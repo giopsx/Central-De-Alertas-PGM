@@ -10,7 +10,7 @@ def token_required(f):
     """Decorator para validar token de acesso."""
     @wraps(f)
     def decorated(*args, **kwargs):
-        from . import current_app
+        from flask import current_app
         token = request.args.get('token') or request.headers.get('Authorization', '').replace('Bearer ', '')
         
         if not token or token != current_app.config['ACCESS_TOKEN']:
