@@ -13,33 +13,58 @@
         }
 
         :root {
-            --primary: #1e3a8a;
+            --primary: #7c3aed;
+            --primary-hover: #6d28d9;
+            --primary-light: #ede9fe;
             --secondary: #dc2626;
             --success: #16a34a;
             --warning: #ea580c;
             --info: #0284c7;
-            --light: #f8fafc;
-            --dark: #1e293b;
-            --border: #e2e8f0;
-            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --light: #f5f3ff;
+            --dark: #1e1b2e;
+            --border: #e4e2f0;
+            --shadow: 0 1px 3px rgba(109, 40, 217, 0.08);
+            --shadow-lg: 0 10px 25px rgba(109, 40, 217, 0.12);
+            /* Dark mode tokens */
+            --bg: #f5f3ff;
+            --card-bg: #ffffff;
+            --text: #1e1b2e;
+            --text-muted: #64748b;
+            --header-bg: #5b21b6;
+            --footer-bg: #f5f3ff;
+        }
+
+        body.dark-mode {
+            --bg: #0f0d1a;
+            --card-bg: #1a1730;
+            --text: #e9e4ff;
+            --text-muted: #a89fd0;
+            --border: #2e2856;
+            --light: #0f0d1a;
+            --dark: #e9e4ff;
+            --shadow: 0 1px 3px rgba(0,0,0,0.4);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.5);
+            --header-bg: #2d1f5e;
+            --footer-bg: #0f0d1a;
         }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: var(--light);
-            color: var(--dark);
+            background: var(--bg);
+            color: var(--text);
             line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
         }
 
         header {
-            background: var(--primary);
+            background: var(--header-bg);
             color: white;
             padding: 20px;
             box-shadow: var(--shadow-lg);
             position: sticky;
             top: 0;
             z-index: 100;
+            transition: background 0.3s;
         }
 
         .header-content {
@@ -128,11 +153,11 @@
         }
 
         .card {
-            background: white;
+            background: var(--card-bg);
             border-radius: 8px;
             padding: 20px;
             box-shadow: var(--shadow);
-            transition: transform 0.3s, box-shadow 0.3s;
+            transition: transform 0.3s, box-shadow 0.3s, background 0.3s;
         }
 
         .card:hover {
@@ -146,7 +171,7 @@
             gap: 10px;
             margin-bottom: 15px;
             font-size: 13px;
-            color: #64748b;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -231,7 +256,7 @@
         }
 
         .btn-primary:hover {
-            background: #1e40af;
+            background: var(--primary-hover);
             transform: translateY(-1px);
             box-shadow: var(--shadow-lg);
         }
@@ -312,7 +337,7 @@
         }
 
         tbody tr:hover {
-            background: var(--light);
+            background: var(--primary-light);
         }
 
         .status-badge {
@@ -371,7 +396,7 @@
         }
 
         .modal-content {
-            background: white;
+            background: var(--card-bg);
             padding: 30px;
             border-radius: 8px;
             max-width: 500px;
@@ -440,10 +465,12 @@
         .footer {
             text-align: center;
             padding: 30px 20px;
-            color: #64748b;
+            color: var(--text-muted);
             font-size: 13px;
             border-top: 1px solid var(--border);
             margin-top: 50px;
+            background: var(--footer-bg);
+            transition: background 0.3s;
         }
 
         @media (max-width: 768px) {
@@ -484,10 +511,92 @@
             animation: spin 0.8s linear infinite;
         }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        /* Dark mode toggle */
+        .dark-toggle {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+        .dark-toggle:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* PDF progress overlay */
+        #pdf-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 16px;
+        }
+        #pdf-overlay.show {
+            display: flex;
+        }
+        #pdf-overlay p {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        #pdf-overlay .pdf-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: #c4b5fd;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        /* Tab & form inputs in dark mode */
+        body.dark-mode .tab-btn {
+            color: var(--text-muted);
+        }
+        body.dark-mode .tab-btn.active {
+            color: #c4b5fd;
+            border-bottom-color: #c4b5fd;
+        }
+        body.dark-mode input,
+        body.dark-mode select {
+            background: #231f3b;
+            color: var(--text);
+            border-color: var(--border);
+        }
+        body.dark-mode th {
+            color: var(--text-muted);
+        }
+        body.dark-mode td {
+            border-color: var(--border);
+        }
+        body.dark-mode .badge-critical { background: #3b1414; color: #fca5a5; }
+        body.dark-mode .badge-warning { background: #2e1d05; color: #fcd34d; }
+        body.dark-mode .badge-success { background: #072212; color: #86efac; }
+        body.dark-mode .badge-info { background: #062035; color: #7dd3fc; }
+        body.dark-mode .status-open { background: #0c2d4a; color: #7dd3fc; }
+        body.dark-mode .status-cumprido { background: #072212; color: #86efac; }
+        body.dark-mode .status-vencido { background: #3b1414; color: #fca5a5; }
+        body.dark-mode .status-proximo { background: #2e1d05; color: #fcd34d; }
+        body.dark-mode .alert-info { background: #0c2d4a; color: #bae6fd; }
+        body.dark-mode .alert-warning { background: #2e1d05; color: #fde68a; }
+        body.dark-mode .alert-danger { background: #3b1414; color: #fecaca; }
+        body.dark-mode .btn-outline { border-color: #c4b5fd; color: #c4b5fd; }
+        body.dark-mode .btn-outline:hover { background: #c4b5fd; color: #1e1b2e; }
+        body.dark-mode .list-group-item { border-color: var(--border); }
+        body.dark-mode .progress-bar { background: var(--border); }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <!-- Header -->
@@ -499,9 +608,16 @@
             </div>
             <div class="user-info">
                 <span>🔒 Protegido por token</span>
+                <button class="dark-toggle" id="darkToggle" onclick="toggleDark()">🌙 Modo Noturno</button>
             </div>
         </div>
     </header>
+
+    <!-- PDF Overlay -->
+    <div id="pdf-overlay">
+        <div class="pdf-spinner"></div>
+        <p id="pdf-status">Gerando PDF...</p>
+    </div>
 
     <!-- Container Principal -->
     <div class="container">
@@ -959,22 +1075,233 @@
     </div>
 
     <script>
+        /* ── Tabs ── */
         function switchTab(e, tabName) {
-            // Remove active de todos os tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-
-            // Adiciona active ao tab selecionado
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
             e.target.classList.add('active');
         }
 
-        function generateReport(type) {
-            alert(`Gerando relatório ${type}...\n\nEm produção, isso geraria um PDF real.`);
+        /* ── Modo Noturno ── */
+        function toggleDark() {
+            const body = document.body;
+            const btn  = document.getElementById('darkToggle');
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            btn.textContent = isDark ? '☀️ Modo Claro' : '🌙 Modo Noturno';
+            localStorage.setItem('pgm-dark', isDark ? '1' : '0');
+        }
+        // Restaurar preferência salva
+        if (localStorage.getItem('pgm-dark') === '1') {
+            document.body.classList.add('dark-mode');
+            document.addEventListener('DOMContentLoaded', () => {
+                const btn = document.getElementById('darkToggle');
+                if (btn) btn.textContent = '☀️ Modo Claro';
+            });
+        }
+
+        /* ── PDF Real ── */
+        async function generateReport(type) {
+            const overlay  = document.getElementById('pdf-overlay');
+            const statusEl = document.getElementById('pdf-status');
+
+            // Mapear conteúdo do relatório por tipo
+            const labels = {
+                semanal:    'Relatório Semanal — Semana 16/2026',
+                mensal:     'Relatório Mensal — Abril/2026',
+                individual: 'Relatório Individual',
+            };
+
+            overlay.classList.add('show');
+            statusEl.textContent = 'Capturando dados do painel…';
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+                const pageW = pdf.internal.pageSize.getWidth();
+                const pageH = pdf.internal.pageSize.getHeight();
+                const margin = 15;
+                let y = margin;
+
+                /* ── Cabeçalho ── */
+                pdf.setFillColor(91, 33, 182); // roxo escuro
+                pdf.rect(0, 0, pageW, 30, 'F');
+
+                pdf.setTextColor(255, 255, 255);
+                pdf.setFontSize(14);
+                pdf.setFont('helvetica', 'bold');
+                pdf.text('PGM Porto Velho — Subprocuradoria Contenciosa', margin, 13);
+
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'normal');
+                pdf.text(labels[type] || `Relatório ${type}`, margin, 22);
+
+                const hoje = new Date().toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric' });
+                const hora = new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+                pdf.text(`Emitido em ${hoje} às ${hora}`, pageW - margin, 22, { align: 'right' });
+
+                y = 40;
+
+                /* ── Bloco de KPIs ── */
+                statusEl.textContent = 'Adicionando indicadores…';
+                await sleep(200);
+
+                const kpis = [
+                    { label: 'Total de Processos', value: '128', color: [124, 58, 237] },
+                    { label: 'Vencidos',            value: '12',  color: [220, 38, 38] },
+                    { label: 'Próximos (7 dias)',   value: '8',   color: [234, 88, 12] },
+                    { label: 'Cumpridos',           value: '108', color: [22, 163, 74] },
+                ];
+
+                const colW = (pageW - margin * 2 - 9) / 4;
+                kpis.forEach((k, i) => {
+                    const x = margin + i * (colW + 3);
+                    pdf.setFillColor(...k.color);
+                    pdf.roundedRect(x, y, colW, 22, 3, 3, 'F');
+                    pdf.setTextColor(255, 255, 255);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(16);
+                    pdf.text(k.value, x + colW / 2, y + 11, { align: 'center' });
+                    pdf.setFontSize(7);
+                    pdf.setFont('helvetica', 'normal');
+                    pdf.text(k.label, x + colW / 2, y + 18, { align: 'center' });
+                });
+
+                y += 32;
+
+                /* ── Taxa de cumprimento ── */
+                pdf.setTextColor(30, 27, 46);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(10);
+                pdf.text('Taxa de Cumprimento Geral', margin, y);
+                y += 5;
+
+                const barW = pageW - margin * 2;
+                pdf.setFillColor(228, 226, 240);
+                pdf.roundedRect(margin, y, barW, 6, 3, 3, 'F');
+                pdf.setFillColor(22, 163, 74);
+                pdf.roundedRect(margin, y, barW * 0.844, 6, 3, 3, 'F');
+
+                pdf.setFontSize(8);
+                pdf.setTextColor(100, 116, 139);
+                pdf.text('84,4%', margin + barW * 0.844 + 2, y + 4.5);
+                y += 14;
+
+                /* ── Tabela de performance ── */
+                statusEl.textContent = 'Montando tabela de performance…';
+                await sleep(200);
+
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(10);
+                pdf.setTextColor(30, 27, 46);
+                pdf.text('Performance por Procurador', margin, y);
+                y += 4;
+
+                // Cabeçalho da tabela
+                const cols = ['Procurador', 'Total', 'Cumpridos', 'Taxa', 'Críticos'];
+                const colXs = [margin, margin+40, margin+65, margin+90, margin+135];
+                const rowH = 8;
+
+                pdf.setFillColor(237, 233, 254);
+                pdf.rect(margin, y, pageW - margin * 2, rowH, 'F');
+                pdf.setFont('helvetica', 'bold');
+                pdf.setFontSize(8);
+                pdf.setTextColor(91, 33, 182);
+                cols.forEach((c, i) => pdf.text(c, colXs[i] + 1, y + 5.5));
+                y += rowH;
+
+                const rows = [
+                    ['Jefferson', '32', '28', '87,5%', '2'],
+                    ['Mariana',   '28', '27', '96,4%', '0'],
+                    ['Carlos',    '35', '31', '88,6%', '5'],
+                    ['Ana',       '33', '22', '66,7%', '5'],
+                ];
+
+                rows.forEach((r, ri) => {
+                    if (ri % 2 === 0) {
+                        pdf.setFillColor(250, 248, 255);
+                        pdf.rect(margin, y, pageW - margin * 2, rowH, 'F');
+                    }
+                    pdf.setFont('helvetica', ri === 0 ? 'bold' : 'normal');
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(30, 27, 46);
+                    r.forEach((cell, ci) => pdf.text(String(cell), colXs[ci] + 1, y + 5.5));
+                    y += rowH;
+                });
+
+                // Borda da tabela
+                pdf.setDrawColor(228, 226, 240);
+                pdf.rect(margin, y - rows.length * rowH - rowH, pageW - margin * 2, rows.length * rowH + rowH);
+                y += 10;
+
+                /* ── Processos Críticos ── */
+                if (type === 'semanal' || type === 'mensal') {
+                    statusEl.textContent = 'Adicionando processos críticos…';
+                    await sleep(200);
+
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(10);
+                    pdf.setTextColor(220, 38, 38);
+                    pdf.text('⚠ Prazos Vencidos (Top 3)', margin, y);
+                    y += 5;
+
+                    const criticos = [
+                        ['2024.0001', 'Carlos',  '05/04/2026', '10 dias'],
+                        ['2024.0015', 'Ana',     '08/04/2026', '7 dias' ],
+                        ['2024.0032', 'Carlos',  '02/04/2026', '13 dias'],
+                    ];
+
+                    const hCols = ['Processo', 'Responsável', 'Prazo', 'Dias Vencido'];
+                    const hXs   = [margin, margin+40, margin+90, margin+130];
+
+                    pdf.setFillColor(254, 226, 226);
+                    pdf.rect(margin, y, pageW - margin * 2, rowH, 'F');
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(185, 28, 28);
+                    hCols.forEach((c, i) => pdf.text(c, hXs[i] + 1, y + 5.5));
+                    y += rowH;
+
+                    criticos.forEach((r, ri) => {
+                        if (ri % 2 === 0) {
+                            pdf.setFillColor(255, 249, 249);
+                            pdf.rect(margin, y, pageW - margin * 2, rowH, 'F');
+                        }
+                        pdf.setFont('helvetica', 'normal');
+                        pdf.setFontSize(8);
+                        pdf.setTextColor(30, 27, 46);
+                        r.forEach((cell, ci) => pdf.text(cell, hXs[ci] + 1, y + 5.5));
+                        y += rowH;
+                    });
+                    y += 10;
+                }
+
+                /* ── Rodapé ── */
+                pdf.setFillColor(245, 243, 255);
+                pdf.rect(0, pageH - 15, pageW, 15, 'F');
+                pdf.setFontSize(7);
+                pdf.setTextColor(100, 116, 139);
+                pdf.text('Procuradoria-Geral do Município de Porto Velho — Documento gerado automaticamente pelo Painel Gerencial PGM', pageW / 2, pageH - 6, { align: 'center' });
+
+                /* ── Salvar ── */
+                statusEl.textContent = 'Finalizando…';
+                await sleep(300);
+
+                const nomeArquivo = `PGM_${type}_${hoje.replace(/\//g, '-')}.pdf`;
+                pdf.save(nomeArquivo);
+
+            } catch (err) {
+                console.error('Erro ao gerar PDF:', err);
+                alert('Erro ao gerar o PDF. Tente novamente.');
+            } finally {
+                overlay.classList.remove('show');
+            }
+        }
+
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
         }
 
         /**
