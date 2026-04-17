@@ -622,6 +622,119 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                     const respEl = document.getElementById('select-relatorio-individual');
                     const resp = respEl ? respEl.value.trim() : '';
                     if (!resp) { alert('Selecione um responsavel.'); overlay.classList.remove('show'); return; }
+
+                    const selOpt   = respEl ? respEl.options[respEl.selectedIndex] : null;
+                    const perfTotal    = parseInt(selOpt ? selOpt.getAttribute('data-total')     : 0) || 0;
+                    const perfCumpr    = parseInt(selOpt ? selOpt.getAttribute('data-cumpridos') : 0) || 0;
+                    const perfTaxa     = parseFloat(selOpt ? selOpt.getAttribute('data-taxa')    : 0) || 0;
+                    const perfCriticos = parseInt(selOpt ? selOpt.getAttribute('data-criticos')  : 0) || 0;
+
+                    statusEl.textContent = 'Buscando dados...';
+
+                    // Buscar cumpridos do responsavel na API
+                    var meusCumpridos = [];
+                    try {
+                        var cr = await fetch('/api/cumpridos?responsavel=' + encodeURIComponent(resp) + '&token=' + getToken());
+                        if (cr.ok) { var cj = await cr.json(); meusCumpridos = cj.cumpridos || []; }
+                    } catch(e) { console.warn('Nao foi possivel buscar cumpridos:', e); }
+
+                    var meusV = VENCIDOS_DATA.filter(function(r2){ return (r2.resp||r2.responsavel||'').toUpperCase() === resp.toUpperCase(); });
+                    var meusP = PROXIMOS7.filter(function(r2){ return (r2.resp||r2.responsavel||'').toUpperCase() === resp.toUpperCase(); });
+
+                    // Cabecalho
+                    pdf.setFillColor(8,12,20);
+                    pdf.rect(0,0,pageW,26,'F');
+                    pdf.setTextColor(255,255,255);
+                    pdf.setFontSize(12); pdf.setFont('helvetica','bold');
+                    pdf.text('Subprocuradoria Contenciosa - PGM Porto Velho', margin, 10);
+                    pdf.setFontSize(9); pdf.setFont('helvetica','normal');
+                    pdf.text('Relatorio Individual: ' + resp + ' - Gerado em ' + hoje, margin, 19);
+                    let y = 32;
+
+                    // Cards de indicadores
+                    const cardW = (pageW - margin*2 - 6) / 4;
+                    const taxaColor = perfTaxa >= 60 ? [5,122,85] : perfTaxa >= 40 ? [194,120,3] : [224,36,36];
+                    const indicadores = [
+                        { label: 'TOTAL',     val: String(perfTotal),           color: [26,86,219] },
+                        { label: 'CUMPRIDOS', val: String(perfCumpr),           color: [5,122,85] },
+                        { label: 'TAXA',      val: perfTaxa.toFixed(1) + '%',   color: taxaColor },
+                        { label: 'CRITICOS',  val: String(perfCriticos),        color: [224,36,36] },
+                    ];
+                    indicadores.forEach(function(card, idx2) {
+                        const cx = margin + idx2 * (cardW + 2);
+                        pdf.setFillColor(245,248,252);
+                        pdf.roundedRect(cx, y, cardW, 22, 2, 2, 'F');
+                        pdf.setFillColor(card.color[0], card.color[1], card.color[2]);
+                        pdf.rect(cx, y, cardW, 3, 'F');
+                        pdf.setFontSize(16); pdf.setFont('helvetica','bold');
+                        pdf.setTextColor(card.color[0], card.color[1], card.color[2]);
+                        pdf.text(card.val, cx + cardW/2, y + 14, {align:'center'});
+                        pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+                        pdf.setTextColor(100,116,139);
+                        pdf.text(card.label, cx + cardW/2, y + 20, {align:'center'});
+                    });
+                    y += 28;
+
+                    // Barra de progresso
+                    pdf.setFillColor(225,230,240);
+                    pdf.rect(margin, y, pageW - margin*2, 5, 'F');
+                    pdf.setFillColor(taxaColor[0], taxaColor[1], taxaColor[2]);
+                    pdf.rect(margin, y, (pageW - margin*2) * Math.min(perfTaxa/100, 1), 5, 'F');
+                    pdf.setFontSize(7); pdf.setTextColor(100,116,139);
+                    pdf.text('Taxa de cumprimento: ' + perfTaxa.toFixed(1) + '%', margin, y + 9);
+                    y += 14;
+
+                    // Secao CUMPRIDOS (em verde)
+                    if (meusCumpridos.length) {
+                        pdf.setFontSize(10); pdf.setFont('helvetica','bold');
+                        pdf.setTextColor(5,122,85);
+                        pdf.text('Processos Cumpridos (' + meusCumpridos.length + ')', margin, y); y += 4;
+                        pdf.autoTable({ startY: y,
+                            head: [['Processo','Parte','Prazo','Vara']],
+                            body: meusCumpridos.map(function(r2){
+                                return [r2.processo||'', r2.parte||'', r2.prazo||'', (r2.vara||'').slice(0,30)];
+                            }),
+                            theme: 'striped',
+                            headStyles: { fillColor:[5,122,85], textColor:255, fontStyle:'bold', fontSize:8 },
+                            bodyStyles: { fontSize:7 },
+                            margin: { left:margin, right:margin }
+                        });
+                        y = pdf.lastAutoTable.finalY + 8;
+                    }
+
+                    // Secao CRITICOS (em amarelo)
+                    if (meusP.length) {
+                        pdf.setFontSize(10); pdf.setFont('helvetica','bold'); pdf.setTextColor(180,100,0);
+                        pdf.text('Vencendo nos Proximos 7 Dias (' + meusP.length + ')', margin, y); y += 4;
+                        pdf.autoTable({ startY: y,
+                            head: [['Processo','Parte','Prazo','Vence em']],
+                            body: meusP.map(function(r2){ var d=r2.dias||0; return [r2.proc||'',r2.parte||'',r2.prazo||'',d===0?'Hoje':d+' dias']; }),
+                            theme: 'striped',
+                            headStyles: { fillColor:[180,100,0], textColor:255, fontStyle:'bold', fontSize:8 },
+                            bodyStyles: { fontSize:7 },
+                            margin: { left:margin, right:margin }
+                        });
+                        y = pdf.lastAutoTable.finalY + 8;
+                    }
+
+                    // Secao VENCIDOS (em vermelho)
+                    if (meusV.length) {
+                        pdf.setFontSize(10); pdf.setFont('helvetica','bold'); pdf.setTextColor(200,30,30);
+                        pdf.text('Prazos Vencidos (' + meusV.length + ')', margin, y); y += 4;
+                        pdf.autoTable({ startY: y,
+                            head: [['Processo','Parte','Prazo','Dias']],
+                            body: meusV.map(function(r2){ return [r2.proc||'',r2.parte||'',r2.prazo||'',r2.dias+'d']; }),
+                            theme: 'striped',
+                            headStyles: { fillColor:[200,30,30], textColor:255, fontStyle:'bold', fontSize:8 },
+                            bodyStyles: { fontSize:7 },
+                            margin: { left:margin, right:margin }
+                        });
+                    }
+
+                    if (!meusCumpridos.length && !meusP.length && !meusV.length) {
+                        pdf.setFontSize(11); pdf.setTextColor(100,116,139);
+                        pdf.text('Nenhum processo encontrado para este responsavel.', margin, y);
+                    }
                     var meusV = VENCIDOS_DATA.filter(function(r){ return (r.resp||r.responsavel||'').toUpperCase() === resp.toUpperCase(); });
                     var meusP = PROXIMOS7.filter(function(r){ return (r.resp||r.responsavel||'').toUpperCase() === resp.toUpperCase(); });
                     pdf.autoTable({ startY:y,
