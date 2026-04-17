@@ -577,7 +577,11 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                     taxa:      (document.getElementById('kpi-taxa-label')?.textContent || '41.7% de taxa').replace('% de taxa','') + '%',
                 };
 
-                let y = cabecalho(type === 'semanal' ? 'Relatorio Semanal' : type === 'mensal' ? 'Relatorio Mensal' : type === 'individual' ? 'Relatorio Individual' : 'Relatorio de Criticos');
+                const tituloRel = type === 'semanal' ? 'Relatorio Semanal'
+                        : type === 'mensal' ? 'Relatorio Mensal'
+                        : type === 'individual' ? ('Relatorio Individual')
+                        : 'Relatorio de Criticos';
+                    let y = cabecalho(tituloRel);
 
                 if (type === 'semanal' || type === 'mensal') {
                     pdf.autoTable({ startY:y,
@@ -641,15 +645,12 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                     var meusV = VENCIDOS_DATA.filter(function(r2){ return (r2.resp||r2.responsavel||'').toUpperCase() === resp.toUpperCase(); });
                     var meusP = PROXIMOS7.filter(function(r2){ return (r2.resp||r2.responsavel||'').toUpperCase() === resp.toUpperCase(); });
 
-                    // Cabecalho
-                    pdf.setFillColor(8,12,20);
-                    pdf.rect(0,0,pageW,26,'F');
-                    pdf.setTextColor(255,255,255);
-                    pdf.setFontSize(12); pdf.setFont('helvetica','bold');
-                    pdf.text('Subprocuradoria Contenciosa - PGM Porto Velho', margin, 10);
-                    pdf.setFontSize(9); pdf.setFont('helvetica','normal');
-                    pdf.text('Relatorio Individual: ' + resp + ' - Gerado em ' + hoje, margin, 19);
-                    let y = 32;
+                    // y ja definido pelo cabecalho() chamado antes do if/else
+                    // Adicionar nome do responsavel abaixo do cabecalho
+                    pdf.setFontSize(13); pdf.setFont('helvetica','bold');
+                    pdf.setTextColor(30,40,80);
+                    pdf.text('Responsavel: ' + resp, margin, y);
+                    y += 8;
 
                     // Cards de indicadores
                     const cardW = (pageW - margin*2 - 6) / 4;
