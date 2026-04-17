@@ -627,6 +627,126 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                     const resp = respEl ? respEl.value.trim() : '';
                     if (!resp) { alert('Selecione um responsavel.'); overlay.classList.remove('show'); return; }
 
+                    statusEl.textContent = 'Buscando dados...';
+
+                    // Buscar performance e cumpridos direto da API
+                    var perfDados = { total:0, cumpridos:0, taxa:0, criticos:0 };
+                    var meusCumpridos = [];
+                    try {
+                        var token = getToken();
+                        var dashRes = await fetch('/api/dashboard?token=' + token);
+                        if (dashRes.ok) {
+                            var dashJson = await dashRes.json();
+                            var perfList = dashJson.performance || [];
+                            var found = perfList.find(function(p) {
+                                return p.responsavel && p.responsavel.toUpperCase() === resp.toUpperCase();
+                            });
+                            if (found) perfDados = found;
+                        }
+                        var cumprRes = await fetch('/api/cumpridos?responsavel=' + encodeURIComponent(resp) + '&token=' + token);
+                        if (cumprRes.ok) {
+                            var cumprJson = await cumprRes.json();
+                            meusCumpridos = cumprJson.cumpridos || [];
+                        }
+                    } catch(e) { console.warn('Erro ao buscar dados:', e); }
+
+                    var meusV = VENCIDOS_DATA.filter(function(r2){
+                        return (r2.resp||r2.responsavel||'').toUpperCase() === resp.toUpperCase();
+                    });
+                    var meusP = PROXIMOS7.filter(function(r2){
+                        return (r2.resp||r2.responsavel||'').toUpperCase() === resp.toUpperCase();
+                    });
+
+                    statusEl.textContent = 'Gerando PDF...';
+
+                    // Nome do responsavel abaixo do cabecalho
+                    pdf.setFontSize(14); pdf.setFont('helvetica','bold');
+                    pdf.setTextColor(20,30,60);
+                    pdf.text('Responsavel: ' + resp, margin, y);
+                    y += 10;
+
+                    // 4 cards de indicadores
+                    const cardW2 = (pageW - margin*2 - 9) / 4;
+                    const taxaC = perfDados.taxa >= 60 ? [5,122,85] : perfDados.taxa >= 40 ? [194,120,3] : [224,36,36];
+                    [
+                        { label:'TOTAL',     val: String(perfDados.total||0),                color:[26,86,219]  },
+                        { label:'CUMPRIDOS', val: String(perfDados.cumpridos||meusCumpridos.length||0), color:[5,122,85]   },
+                        { label:'TAXA',      val: (perfDados.taxa||0).toFixed(1)+'%',         color:taxaC        },
+                        { label:'CRITICOS',  val: String(perfDados.criticos||meusV.length||0), color:[224,36,36] },
+                    ].forEach(function(card, ci) {
+                        const cx = margin + ci * (cardW2 + 3);
+                        pdf.setFillColor(240,244,252);
+                        pdf.rect(cx, y, cardW2, 22, 'F');
+                        pdf.setFillColor(card.color[0], card.color[1], card.color[2]);
+                        pdf.rect(cx, y, cardW2, 3, 'F');
+                        pdf.setFontSize(18); pdf.setFont('helvetica','bold');
+                        pdf.setTextColor(card.color[0], card.color[1], card.color[2]);
+                        pdf.text(card.val, cx + cardW2/2, y + 15, {align:'center'});
+                        pdf.setFontSize(7); pdf.setFont('helvetica','normal');
+                        pdf.setTextColor(100,116,139);
+                        pdf.text(card.label, cx + cardW2/2, y + 20, {align:'center'});
+                    });
+                    y += 28;
+
+                    // Barra de progresso da taxa
+                    const taxa2 = perfDados.taxa || 0;
+                    pdf.setFillColor(220,226,238);
+                    pdf.rect(margin, y, pageW-margin*2, 5, 'F');
+                    pdf.setFillColor(taxaC[0], taxaC[1], taxaC[2]);
+                    pdf.rect(margin, y, (pageW-margin*2) * Math.min(taxa2/100, 1), 5, 'F');
+                    pdf.setFontSize(7); pdf.setTextColor(100,116,139);
+                    pdf.text('Taxa de cumprimento: ' + taxa2.toFixed(1) + '%', margin, y+9);
+                    y += 14;
+
+                    // CUMPRIDOS (verde)
+                    if (meusCumpridos.length) {
+                        pdf.setFontSize(10); pdf.setFont('helvetica','bold');
+                        pdf.setTextColor(5,122,85);
+                        pdf.text('Processos Cumpridos (' + meusCumpridos.length + ')', margin, y); y += 4;
+                        pdf.autoTable({ startY:y,
+                            head:[['Processo','Parte','Prazo','Vara']],
+                            body: meusCumpridos.map(function(r2){
+                                return [r2.processo||'', (r2.parte||'').slice(0,35), r2.prazo||'', (r2.vara||'').slice(0,25)];
+                            }),
+                            theme:'striped',
+                            headStyles:{fillColor:[5,122,85],textColor:255,fontStyle:'bold',fontSize:8},
+                            bodyStyles:{fontSize:7}, margin:{left:margin,right:margin}
+                        });
+                        y = pdf.lastAutoTable.finalY + 8;
+                    }
+
+                    // PROXIMOS 7 DIAS (amarelo)
+                    if (meusP.length) {
+                        pdf.setFontSize(10); pdf.setFont('helvetica','bold'); pdf.setTextColor(180,100,0);
+                        pdf.text('Vencendo nos Proximos 7 Dias (' + meusP.length + ')', margin, y); y += 4;
+                        pdf.autoTable({ startY:y,
+                            head:[['Processo','Parte','Prazo','Vence em']],
+                            body: meusP.map(function(r2){ var d=r2.dias||0; return [r2.proc||'',( r2.parte||'').slice(0,35),r2.prazo||'',d===0?'Hoje':d+' dias']; }),
+                            theme:'striped',
+                            headStyles:{fillColor:[180,100,0],textColor:255,fontStyle:'bold',fontSize:8},
+                            bodyStyles:{fontSize:7}, margin:{left:margin,right:margin}
+                        });
+                        y = pdf.lastAutoTable.finalY + 8;
+                    }
+
+                    // VENCIDOS (vermelho)
+                    if (meusV.length) {
+                        pdf.setFontSize(10); pdf.setFont('helvetica','bold'); pdf.setTextColor(200,30,30);
+                        pdf.text('Prazos Vencidos (' + meusV.length + ')', margin, y); y += 4;
+                        pdf.autoTable({ startY:y,
+                            head:[['Processo','Parte','Prazo','Dias']],
+                            body: meusV.map(function(r2){ return [r2.proc||'',(r2.parte||'').slice(0,35),r2.prazo||'',r2.dias+'d']; }),
+                            theme:'striped',
+                            headStyles:{fillColor:[200,30,30],textColor:255,fontStyle:'bold',fontSize:8},
+                            bodyStyles:{fontSize:7}, margin:{left:margin,right:margin}
+                        });
+                    }
+
+                    if (!meusCumpridos.length && !meusP.length && !meusV.length) {
+                        pdf.setFontSize(11); pdf.setTextColor(100,116,139);
+                        pdf.text('Nenhum processo encontrado para este responsavel.', margin, y);
+                    }
+
                     const selOpt   = respEl ? respEl.options[respEl.selectedIndex] : null;
                     const perfTotal    = parseInt(selOpt ? selOpt.getAttribute('data-total')     : 0) || 0;
                     const perfCumpr    = parseInt(selOpt ? selOpt.getAttribute('data-cumpridos') : 0) || 0;
