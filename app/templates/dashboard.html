@@ -730,13 +730,12 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 
         function abrirWhatsApp(numero, mensagem) {
             var num = numero.replace(/[^0-9]/g, '');
-            var a = document.createElement('a');
-            a.href = 'https://wa.me/' + num + '?text=' + encodeURIComponent(mensagem);
-            a.target = '_blank';
-            a.rel = 'noopener';
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(function(){ if(a.parentNode) a.parentNode.removeChild(a); }, 1000);
+            var url = 'https://wa.me/' + num + '?text=' + encodeURIComponent(mensagem);
+            var w = window.open(url, '_blank', 'noopener,noreferrer');
+            if (!w) {
+                // Se popup bloqueado, abrir na mesma aba
+                window.location.href = url;
+            }
         }
 
         function _wppModal(responsavel, mensagem) {
@@ -768,43 +767,77 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
             ov.appendChild(box); document.body.appendChild(ov);
             setTimeout(function(){ inp.focus(); }, 30);
             function fechar(){ ov.remove(); }
-            function enviar(){
+            btnOk.onclick = function() {
                 var num = inp.value.replace(/[^0-9]/g,'');
                 if(num.length < 10){ inp.style.borderColor='var(--red)'; inp.focus(); return; }
                 if(!_contatosCache) _contatosCache={};
                 _contatosCache[responsavel.toUpperCase()] = num;
+                var url = 'https://wa.me/' + num + '?text=' + encodeURIComponent(mensagem);
                 fechar();
-                abrirWhatsApp(num, mensagem);
-            }
-            btnOk.onclick = enviar;
+                window.open(url, '_blank', 'noopener,noreferrer') || (window.location.href = url);
+            };
             btnX.onclick  = fechar;
             inp.onkeydown = function(e){ if(e.key==='Enter') enviar(); if(e.key==='Escape') fechar(); };
             ov.onclick    = function(e){ if(e.target===ov) fechar(); };
         }
 
         function enviarAlerta(processo, responsavel, prazo, tipo) {
-            var resp = (responsavel||'').toUpperCase();
+            var resp = (responsavel||'').trim().toUpperCase();
+            var msg  = montarMensagem(processo, responsavel, prazo, tipo);
             var numero = null;
-            // Cache em memoria
-            if (_contatosCache && _contatosCache[resp]) numero = _contatosCache[resp];
-            // localStorage
-            if (!numero) {
-                try {
-                    var lista = JSON.parse(localStorage.getItem('pgm_equipe_v1')||'[]');
-                    var mb = lista.find(function(m){ return m.nome && m.nome.toUpperCase()===resp; });
-                    if (mb && mb.whatsapp) {
-                        numero = mb.whatsapp;
-                        if (!_contatosCache) _contatosCache = {};
-                        _contatosCache[resp] = numero;
-                    }
-                } catch(e){}
-            }
-            var msg = montarMensagem(processo, responsavel, prazo, tipo);
-            if (numero) {
+
+            // DEBUG - remover depois
+            console.log('[WPP] responsavel bruto:', responsavel);
+            console.log('[WPP] resp uppercase:', resp);
+            console.log('[WPP] _contatosCache:', JSON.stringify(_contatosCache));
+            try { console.log('[WPP] localStorage:', localStorage.getItem('pgm_equipe_v1')); } catch(e){}
+
+            // 1. Cache em memoria (ja carregado pelo equipe_renderizar)
+            if (_contatosCache && _contatosCache[resp]) {
+                numero = _contatosCache[resp];
                 abrirWhatsApp(numero, msg);
-            } else {
-                _wppModal(responsavel, msg);
+                return;
             }
+
+            // 2. localStorage (backup local)
+            try {
+                var lista = JSON.parse(localStorage.getItem('pgm_equipe_v1')||'[]');
+                var mb = lista.find(function(m){
+                    return m.nome && m.nome.trim().toUpperCase() === resp;
+                });
+                if (mb && mb.whatsapp) {
+                    numero = mb.whatsapp;
+                    if (!_contatosCache) _contatosCache = {};
+                    _contatosCache[resp] = numero;
+                    abrirWhatsApp(numero, msg);
+                    return;
+                }
+            } catch(e){}
+
+            // 3. Buscar da API em tempo real e abrir modal com o numero preenchido
+            fetch('/api/equipe?token=' + getToken())
+                .then(function(r){ return r.json(); })
+                .then(function(json){
+                    var membros = json.membros || [];
+                    // Popular cache completo
+                    if (!_contatosCache) _contatosCache = {};
+                    membros.forEach(function(m){
+                        if (m.nome && m.whatsapp)
+                            _contatosCache[m.nome.trim().toUpperCase()] = m.whatsapp;
+                    });
+                    // Salvar no localStorage para proximas vezes
+                    try { localStorage.setItem('pgm_equipe_v1', JSON.stringify(membros)); } catch(e){}
+                    // Tentar de novo com cache atualizado
+                    var num2 = _contatosCache[resp] || null;
+                    if (num2) {
+                        abrirWhatsApp(num2, msg);
+                    } else {
+                        _wppModal(responsavel, msg);
+                    }
+                })
+                .catch(function(){
+                    _wppModal(responsavel, msg);
+                });
         }
 
         function montarMensagem(processo, responsavel, prazo, tipo) {
