@@ -1421,414 +1421,205 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
         setTimeout(initUploadMelhorado, 200);
 
         loadDashboard();
-        equipe_renderizar();
 
-        // ─── Upload real da planilha ───────────────────────────────────────
-        document.getElementById('importForm')?.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const token = getToken();
-            const fileInput = document.getElementById('file');
-            const btn = this.querySelector('button[type=submit]');
+        var PROXIMOS7 = JSON.parse(document.getElementById('dados-proximos').textContent);
+        var VENCIDOS_DATA = JSON.parse(document.getElementById('dados-vencidos').textContent);
+        var POR_PAG = 25;
+        var pagState = { critico: 1, vencido: 1 };
+        var filtroState = { critico:{texto:'',resp:'',vara:''}, vencido:{texto:'',resp:'',vara:''} };
 
-            if (!fileInput.files[0]) return alert('Selecione um arquivo.');
-
-            btn.textContent = '⏳ Importando…';
-            btn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('file', fileInput.files[0]);
-
-            try {
-                const res = await fetch(`/api/upload?token=${token}`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const json = await res.json();
-
-                if (res.ok && json.success) {
-                    const s = json.stats;
-                    alert(`✅ Planilha importada com sucesso!\n\n📊 ${s.total} processos carregados\n⏰ ${s.vencidos} vencidos\n📅 ${s.proximos} próximos (7 dias)\n✅ ${s.cumpridos} cumpridos (${s.taxa}%)`);
-                    this.reset();
-                    await loadDashboard();   // ← atualiza todo o dashboard
-                } else {
-                    alert(`❌ Erro: ${json.error || 'Falha desconhecida'}`);
-                }
-            } catch (err) {
-                alert(`❌ Erro de rede: ${err.message}`);
-            } finally {
-                btn.textContent = '🚀 Importar Planilha';
-                btn.disabled = false;
-            }
-        });
-
-        // ─── EQUIPE — CRUD com localStorage ──────────────────────────────
-        const EQUIPE_KEY = 'pgm_equipe_v1';
-
-        function equipe_carregar() {
-            try { return JSON.parse(localStorage.getItem(EQUIPE_KEY)) || []; }
-            catch { return []; }
+        function filtrarDados(dados,f){
+            return dados.filter(function(r){
+                var hay=((r.proc||r.processo||'')+(r.parte||'')+(r.resp||r.responsavel||'')+(r.vara||'')).toLowerCase();
+                return (!f.texto||hay.indexOf(f.texto.toLowerCase())>=0)&&(!f.resp||(r.resp||r.responsavel||'')===f.resp)&&(!f.vara||(r.vara||'').indexOf(f.vara)>=0);
+            });
         }
 
-        function equipe_salvar_storage(lista) {
-            localStorage.setItem(EQUIPE_KEY, JSON.stringify(lista));
+        function buildPB(tipo,page,label,dis,active){
+            return '<button class="pbtn'+(active?' active':'')+'" onclick="mudarPag(\"'+tipo+'\",'+page+')"'+(dis?' disabled':'')+'>'+label+'<\/button>';
         }
 
-        function equipe_renderizar() {
-            const lista = equipe_carregar();
-            const ul = document.getElementById('equipe-lista');
-            if (!ul) return;
-            if (lista.length === 0) {
-                ul.innerHTML = '<li style="color:#94a3b8;padding:16px;">Nenhum membro cadastrado ainda.</li>';
-                return;
-            }
-            ul.innerHTML = lista.map((m, i) => `
-                <li class="list-group-item">
-                    <div>
-                        <strong>${m.nome}</strong><br>
-                        <small style="color:#64748b;">${m.funcao}${m.email ? ' | ' + m.email : ''}${m.whatsapp ? ' | ' + m.whatsapp : ''}</small>
-                    </div>
-                    <div style="display:flex;gap:6px;">
-                        <button class="btn-icon" title="Editar" onclick="equipe_editar(${i})">✏️</button>
-                        <button class="btn-icon" title="Remover" onclick="equipe_excluir(${i})">🗑️</button>
-                    </div>
-                </li>`).join('');
-        }
-
-        function equipe_salvar() {
-            const nome     = document.getElementById('eq-nome').value.trim();
-            const funcao   = document.getElementById('eq-funcao').value;
-            const email    = document.getElementById('eq-email').value.trim();
-            const whatsapp = document.getElementById('eq-whatsapp').value.trim();
-            const editId   = document.getElementById('equipe-edit-id').value;
-
-            if (!nome) { alert('Informe o nome do membro.'); return; }
-
-            const lista = equipe_carregar();
-            const membro = { nome, funcao, email, whatsapp };
-
-            if (editId !== '') {
-                lista[parseInt(editId)] = membro;
+        function renderPagina(tipo){
+            var ic=tipo==='critico';
+            var dados=ic?PROXIMOS7:VENCIDOS_DATA;
+            var f=filtroState[tipo];
+            var fl=filtrarDados(dados,f);
+            var tp=Math.max(1,Math.ceil(fl.length/POR_PAG));
+            if(pagState[tipo]>tp) pagState[tipo]=tp;
+            var ini=(pagState[tipo]-1)*POR_PAG;
+            var pg=fl.slice(ini,ini+POR_PAG);
+            var cntEl=document.getElementById(ic?'count-proximos-vencer':'count-vencidos');
+            if(cntEl) cntEl.textContent=fl.length;
+            var tb=document.getElementById(ic?'tbody-proximos-vencer':'tbody-vencidos');
+            if(!tb) return;
+            if(!pg.length){
+                tb.innerHTML='<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Nenhum processo encontrado.<\/td><\/tr>';
             } else {
-                lista.push(membro);
+                var rows='';
+                for(var i=0;i<pg.length;i++){
+                    var r=pg[i];
+                    var proc=r.proc||r.processo||'';
+                    var parte=r.parte||'';
+                    var resp=r.resp||r.responsavel||'';
+                    var prazo=r.prazo||'';
+                    var vara=r.vara||'';
+                    var dias=r.dias||0;
+                    var pj2=JSON.stringify(proc);
+                    var rj2=JSON.stringify(resp);
+                    var prj2=JSON.stringify(prazo);
+                    var tipo2=JSON.stringify(ic?'proximo':'vencido');
+                    var dl=ic?(dias===0?'Hoje':dias===1?'Amanha':dias+' dias'):dias+'d';
+                    var bc=ic?'ba':'br';
+                    rows+='<tr>'+
+                        '<td><strong>'+proc+'<\/strong><\/td>'+
+                        '<td style="font-size:11px">'+parte+'<\/td>'+
+                        '<td>'+resp+'<\/td>'+
+                        '<td>'+prazo+'<\/td>'+
+                        '<td><span class="badge '+bc+'">'+dl+'<\/span><\/td>'+
+                        '<td style="font-size:11px;color:var(--text3)">'+vara+'<\/td>'+
+                        '<td style="display:flex;gap:4px">'+
+                            '<button class="btn-icon" onclick="enviarAlerta('+pj2+','+rj2+','+prj2+','+tipo2+')" title="Enviar WhatsApp">&#128241;<\/button>'+
+                            '<button class="btn-icon" onclick="confirmarCumprido('+pj2+',this)" title="Marcar cumprido" style="color:var(--green)">&#10003;<\/button>'+
+                        '<\/td>'+
+                    '<\/tr>';
+                }
+                tb.innerHTML=rows;
             }
-
-            equipe_salvar_storage(lista);
-            equipe_renderizar();
-            equipe_limparForm();
-            alert(`✅ Membro "${nome}" salvo com sucesso!`);
+            var pe=document.getElementById('pag-'+tipo); if(!pe) return;
+            var s=Math.max(1,pagState[tipo]-2),e=Math.min(tp,s+4);
+            var btns=buildPB(tipo,pagState[tipo]-1,'&#8249;',pagState[tipo]===1,false);
+            for(var k=s;k<=e;k++) btns+=buildPB(tipo,k,k,false,k===pagState[tipo]);
+            btns+=buildPB(tipo,pagState[tipo]+1,'&#8250;',pagState[tipo]===tp,false);
+            pe.innerHTML='<span>'+fl.length+' processos - pag. '+pagState[tipo]+' de '+tp+'<\/span><div class="pbtns">'+btns+'<\/div>';
         }
 
-        function equipe_editar(i) {
-            const lista = equipe_carregar();
-            const m = lista[i];
-            document.getElementById('eq-nome').value      = m.nome;
-            document.getElementById('eq-funcao').value    = m.funcao;
-            document.getElementById('eq-email').value     = m.email || '';
-            document.getElementById('eq-whatsapp').value  = m.whatsapp || '';
-            document.getElementById('equipe-edit-id').value = i;
-            document.getElementById('equipe-form-titulo').textContent = '✏️ Editar Membro';
-            document.getElementById('equipe-btn-cancelar').style.display = 'inline-flex';
-            document.getElementById('eq-nome').focus();
-            // Scroll até o formulário
-            document.getElementById('equipe-form-titulo').scrollIntoView({ behavior: 'smooth' });
+        function mudarPag(tipo,p){
+            var total=filtrarDados(tipo==='critico'?PROXIMOS7:VENCIDOS_DATA,filtroState[tipo]).length;
+            pagState[tipo]=Math.min(Math.max(1,p),Math.max(1,Math.ceil(total/POR_PAG)));
+            renderPagina(tipo);
         }
 
-        function equipe_excluir(i) {
-            const lista = equipe_carregar();
-            if (!confirm(`Remover "${lista[i].nome}" da equipe?`)) return;
-            lista.splice(i, 1);
-            equipe_salvar_storage(lista);
-            equipe_renderizar();
+        function initFiltros(){
+            [['filtro-critico','resp-critico','vara-critico','critico'],['filtro-vencido','resp-vencido','vara-vencido','vencido']].forEach(function(g){
+                var ft=document.getElementById(g[0]),rs=document.getElementById(g[1]),vs=document.getElementById(g[2]),t=g[3];
+                if(ft) ft.addEventListener('input',function(){ filtroState[t].texto=this.value; pagState[t]=1; renderPagina(t); });
+                if(rs) rs.addEventListener('change',function(){ filtroState[t].resp=this.value; pagState[t]=1; renderPagina(t); });
+                if(vs) vs.addEventListener('change',function(){ filtroState[t].vara=this.value; pagState[t]=1; renderPagina(t); });
+            });
         }
 
-        function equipe_cancelarEdicao() {
-            equipe_limparForm();
+        function renderCriticos(data){
+            if(data&&data.proximos) PROXIMOS7=data.proximos.map(function(r){return{proc:r.processo,parte:r.parte||'',resp:r.responsavel,prazo:r.prazo,vara:r.vara,dias:r.dias};});
+            if(data&&data.vencidos) VENCIDOS_DATA=data.vencidos.map(function(r){return{proc:r.processo,parte:r.parte||'',resp:r.responsavel,prazo:r.prazo,vara:r.vara,dias:r.dias};});
+            renderPagina('critico'); renderPagina('vencido');
         }
 
-        function equipe_limparForm() {
-            document.getElementById('eq-nome').value      = '';
-            document.getElementById('eq-email').value     = '';
-            document.getElementById('eq-whatsapp').value  = '';
-            document.getElementById('equipe-edit-id').value = '';
-            document.getElementById('equipe-form-titulo').textContent = '➕ Novo Membro';
-            document.getElementById('equipe-btn-cancelar').style.display = 'none';
+        function renderTabelaPerf(perf){
+            var tb=document.getElementById('tbody-performance'); if(!tb) return;
+            if(!perf||!perf.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Sem dados<\/td><\/tr>'; return; }
+            tb.innerHTML=perf.map(function(p){
+                var resp=p.responsavel||p.resp||'';
+                var cls=p.criticos===0?'bg':p.criticos<=3?'ba':'br';
+                return '<tr><td><strong>'+resp+'<\/strong><\/td><td>'+(p.total||0)+'<\/td><td>'+(p.cumpridos||0)+'<\/td>'+
+                    '<td><div class="pr-bar"><div class="pr-fill" style="width:'+(p.taxa||0)+'%"><\/div><\/div><\/td>'+
+                    '<td><span class="badge '+cls+'">'+(p.criticos||0)+'<\/span><\/td><\/tr>';
+            }).join('');
         }
 
-        // Carrega a equipe ao abrir a página
+        function renderDashboard(data){
+            var kpis={total:938,vencidos:VENCIDOS_DATA.length,proximos:PROXIMOS7.length,cumpridos:391,taxa:41.7};
+            if(data&&!data.sem_dados&&data.stats){
+                kpis=data.stats;
+                if(data.performance){ renderChart(data.performance); renderTabelaPerf(data.performance); }
+                if(data.filename){ var hh=document.getElementById('import-history'); if(hh) hh.innerHTML='<li style="font-size:13px;color:var(--text)"><strong>'+data.filename+'<\/strong><\/li>'; }
+            } else {
+                var perf={};
+                VENCIDOS_DATA.forEach(function(r){ var n=(r.resp||'').trim(); if(!n||n.length>20) return; if(!perf[n]) perf[n]={responsavel:n,total:0,cumpridos:0,criticos:0,taxa:0}; perf[n].total++; perf[n].criticos++; });
+                PROXIMOS7.forEach(function(r){ var n=(r.resp||'').trim(); if(!n||n.length>20) return; if(!perf[n]) perf[n]={responsavel:n,total:0,cumpridos:0,criticos:0,taxa:0}; perf[n].total++; });
+                var pl=Object.values(perf).sort(function(a,b){return b.criticos-a.criticos;}).slice(0,10);
+                renderChart(pl); renderTabelaPerf(pl);
+            }
+            ['total','vencidos','proximos','cumpridos'].forEach(function(k){ var el=document.getElementById('kpi-'+k); if(el) el.textContent=kpis[k]; });
+            var tx=document.getElementById('kpi-taxa-label'); if(tx) tx.textContent=(kpis.taxa||41.7)+'% de taxa';
+            renderPagina('critico'); renderPagina('vencido'); renderPrazosRecentes();
+            var nc=document.getElementById('nb-c'),nv=document.getElementById('nb-v');
+            if(nc) nc.textContent=PROXIMOS7.length;
+            if(nv) nv.textContent=VENCIDOS_DATA.length;
+        }
+
+        function renderPrazosRecentes(){
+            var c=document.getElementById('prazos-recentes'); if(!c) return;
+            var list=PROXIMOS7.slice(0,6);
+            if(!list.length){ c.innerHTML='<p style="color:var(--text3);font-size:13px">Nenhum prazo critico.<\/p>'; return; }
+            c.innerHTML=list.map(function(r){
+                var d=r.dias||0;
+                var cls=d<=2?'pr':d<=4?'pa':'pg';
+                var lbl=d===0?'Hoje':d===1?'Amanha':d+' dias';
+                var bc=d<=2?'br':d<=4?'ba':'bg';
+                return '<div class="pc '+cls+'"><div class="pcdot"><\/div><div style="flex:1;min-width:0"><div class="pcproc">'+(r.proc||r.processo||'')+'<\/div><div class="pcinfo">'+(r.resp||r.responsavel||'')+'<\/div><\/div><span class="badge '+bc+'">'+lbl+'<\/span><\/div>';
+            }).join('');
+        }
+
+        function switchTab(e,n){
+            document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
+            document.querySelectorAll('.ni').forEach(function(b){b.classList.remove('active');});
+            document.getElementById(n).classList.add('active');
+            e.currentTarget.classList.add('active');
+        }
+        function switchTabByName(n){
+            document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
+            document.getElementById(n).classList.add('active');
+        }
+
+        var _isDark=true;
+        function toggleDark(){
+            _isDark=!_isDark;
+            var d=document.documentElement;
+            if(_isDark){
+                d.style.setProperty('--bg','#080c14'); d.style.setProperty('--bg3','#111827');
+                d.style.setProperty('--surface','#131c2e'); d.style.setProperty('--surface2','#1a2540');
+                d.style.setProperty('--border','#1e2d45'); d.style.setProperty('--border2','#263554');
+                d.style.setProperty('--text','#f0f4ff'); d.style.setProperty('--text2','#8899bb'); d.style.setProperty('--text3','#4a607a');
+            } else {
+                d.style.setProperty('--bg','#f0f4f8'); d.style.setProperty('--bg3','#f1f5f9');
+                d.style.setProperty('--surface','#ffffff'); d.style.setProperty('--surface2','#f8fafc');
+                d.style.setProperty('--border','#e4e9f0'); d.style.setProperty('--border2','#d0d7e3');
+                d.style.setProperty('--text','#0d1117'); d.style.setProperty('--text2','#4a5568'); d.style.setProperty('--text3','#8492a6');
+            }
+            localStorage.setItem('pgm-dark',_isDark?'1':'0');
+        }
+        if(localStorage.getItem('pgm-dark')==='0') toggleDark();
+
+        async function equipe_renderizar(){
+            var lista=[];
+            try{
+                var r=await fetch('/api/equipe?token='+getToken());
+                if(r.ok){ var j=await r.json(); lista=j.membros||[]; }
+            }catch(e){
+                try{ lista=JSON.parse(localStorage.getItem('pgm_equipe_v1'))||[]; }catch(e2){}
+            }
+            var ul=document.getElementById('equipe-lista'); if(!ul) return;
+            if(!lista.length){ ul.innerHTML='<li style="color:var(--text3);font-size:13px">Nenhum membro cadastrado ainda.<\/li>'; return; }
+            var cores=['#3b7fff','#00c875','#ffb300','#ff4757','#8b5cf6','#06b6d4'];
+            ul.innerHTML=lista.map(function(m,i){
+                var ini=(m.nome||'?').slice(0,2).toUpperCase();
+                var id=m.id!=null?m.id:i;
+                var idf=JSON.stringify(id);
+                var nomef=JSON.stringify(m.nome||'');
+                return '<div class="li"><div style="display:flex;align-items:center;gap:10px">'+
+                    '<div class="av" style="background:'+cores[i%cores.length]+'">'+ini+'<\/div>'+
+                    '<div><div style="font-size:13px;font-weight:600;color:var(--text)">'+m.nome+'<\/div>'+
+                    '<div style="font-size:11px;color:var(--text3)">'+m.funcao+(m.whatsapp?' - '+m.whatsapp:'')+'<\/div><\/div><\/div>'+
+                    '<div style="display:flex;gap:6px">'+
+                    '<button class="bia" onclick="equipe_editar_api('+idf+')">Editar<\/button>'+
+                    '<button class="bia" onclick="equipe_excluir_api('+idf+','+nomef+')" style="color:var(--red)">Remover<\/button>'+
+                    '<\/div><\/div>';
+            }).join('');
+        }
+
+        initFiltros();
+        loadDashboard();
         equipe_renderizar();
-
-    
-
-// ── PRAZOS RECENTES (novo card no dashboard) ──────────────────────────────
-function renderPrazosRecentes() {
-  var container = document.getElementById('prazos-recentes');
-  if (!container) return;
-  var recentes = PROXIMOS7.slice(0, 6);
-  if (recentes.length === 0) {
-    container.innerHTML = '<p class="text-sm" style="color:#94a3b8">Nenhum prazo vencendo nos próximos 7 dias.</p>';
-    return;
-  }
-  container.innerHTML = recentes.map(function(r) {
-    var dias = r.dias || 0;
-    var cls, label;
-    if (dias === 0) { cls = 'bg-red-100 text-red-700 border-l-4 border-red-500'; label = 'Hoje'; }
-    else if (dias <= 2) { cls = 'bg-red-100 text-red-700 border-l-4 border-red-500'; label = dias + ' dias'; }
-    else if (dias <= 4) { cls = 'bg-amber-100 text-amber-700 border-l-4 border-amber-500'; label = dias + ' dias'; }
-    else { cls = 'bg-emerald-100 text-emerald-700 border-l-4 border-emerald-500'; label = dias + ' dias'; }
-    var proc = r.proc || r.processo || '';
-    var parte = r.parte || '';
-    var resp  = r.resp || r.responsavel || '—';
-    return '<div class="' + cls + ' rounded-lg px-4 py-3 flex items-center justify-between gap-3">'
-      + '<div class="min-w-0 flex-1">'
-      + '<p class="font-semibold text-sm truncate">' + proc + '</p>'
-      + '<p class="text-xs opacity-75 truncate">' + parte + ' · ' + resp + '</p>'
-      + '</div>'
-      + '<span class="flex-shrink-0 text-xs font-bold px-2 py-1 rounded-full bg-white bg-opacity-60">' + label + '</span>'
-      + '</div>';
-  }).join('');
-}
-
-// Chamar após init
-setTimeout(renderPrazosRecentes, 300);
-
-
-function switchTabByName(name) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  document.getElementById(name).classList.add('active');
-}
-
-function switchTab(e, name) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
-  document.getElementById(name).classList.add('active');
-  e.currentTarget.classList.add('active');
-}
-
-function toggleDark() {
-  document.body.classList.toggle('dark');
-  var btn = document.getElementById('darkToggle');
-  var isDark = document.body.classList.contains('dark');
-  btn.innerHTML = isDark
-    ? '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg> Modo claro'
-    : '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg> Modo noturno';
-  localStorage.setItem('pgm-dark', isDark ? '1' : '0');
-}
-if (localStorage.getItem('pgm-dark') === '1') { document.body.classList.add('dark'); }
-
-function renderPrazosRecentes() {
-  var c = document.getElementById('prazos-recentes');
-  if (!c) return;
-  var list = (typeof PROXIMOS7 !== 'undefined' ? PROXIMOS7 : []).slice(0, 5);
-  if (!list.length) { c.innerHTML = '<p style="color:var(--text3);font-size:13px">Nenhum prazo critico nos proximos 7 dias.</p>'; return; }
-  c.innerHTML = list.map(function(r) {
-    var dias = r.dias || 0;
-    var cls  = dias === 0 ? 'red' : dias <= 2 ? 'red' : dias <= 4 ? 'amber' : 'green';
-    var lbl  = dias === 0 ? 'Hoje' : dias === 1 ? 'Amanha' : dias + ' dias';
-    var proc = r.proc || r.processo || '';
-    var resp = r.resp || r.responsavel || '—';
-    var vara = (r.vara || '').replace('Vara de Fazenda e Saude Publica','Faz. Publica').slice(0,30);
-    return '<div class="prazo-card ' + cls + '">'
-      + '<div class="prazo-card-dot"></div>'
-      + '<div style="flex:1;min-width:0">'
-      + '<div class="prazo-card-proc">' + proc + '</div>'
-      + '<div class="prazo-card-info">' + resp + ' · ' + vara + '</div>'
-      + '</div>'
-      + '<span class="badge badge-' + (cls === 'green' ? 'green' : cls === 'amber' ? 'amber' : 'red') + ' prazo-card-badge">' + lbl + '</span>'
-      + '</div>';
-  }).join('');
-}
-
-function buildPagBtn(tipo, page, label, disabled, active) {
-  var cls = 'pag-btn' + (active ? ' active' : '');
-  var dis = disabled ? ' disabled' : '';
-  return '<button class="' + cls + '" onclick="mudarPag("' + tipo + '",' + page + ')"' + dis + '>' + label + '</button>';
-}
-
-var _origRenderPag = renderPagina;
-function renderPagina(tipo) {
-  _origRenderPag(tipo);
-  var pagEl = document.getElementById('pag-' + tipo);
-  if (!pagEl || !pagEl.innerHTML) return;
-  var dados = tipo === 'critico' ? PROXIMOS7 : VENCIDOS_DATA;
-  var f = filtroState[tipo];
-  var filtrado = filtrarDados(dados, f);
-  var totalPags = Math.max(1, Math.ceil(filtrado.length / POR_PAG));
-  var cur = pagState[tipo];
-  var s = Math.max(1, cur-2); var e = Math.min(totalPags, s+4);
-  var btns = buildPagBtn(tipo, cur-1, '&#8249;', cur===1, false);
-  for (var i=s;i<=e;i++) btns += buildPagBtn(tipo, i, i, false, i===cur);
-  btns += buildPagBtn(tipo, cur+1, '&#8250;', cur===totalPags, false);
-  pagEl.innerHTML = '<span>' + filtrado.length + ' processos · pag. ' + cur + ' de ' + totalPags + '</span><div class="pag-btns">' + btns + '</div>';
-}
-
-var _origRD2 = renderDashboard;
-function renderDashboard(data) {
-  _origRD2(data);
-  renderPrazosRecentes();
-  var nb_c = document.getElementById('nb-criticos');
-  var nb_v = document.getElementById('nb-vencidos');
-  if (nb_c) nb_c.textContent = PROXIMOS7.length;
-  if (nb_v) nb_v.textContent = VENCIDOS_DATA.length;
-}
-
-setTimeout(renderPrazosRecentes, 400);
-setTimeout(function() {
-  var nb_c = document.getElementById('nb-criticos');
-  var nb_v = document.getElementById('nb-vencidos');
-  if (nb_c) nb_c.textContent = (typeof PROXIMOS7 !== 'undefined' ? PROXIMOS7.length : 38);
-  if (nb_v) nb_v.textContent = (typeof VENCIDOS_DATA !== 'undefined' ? VENCIDOS_DATA.length : 376);
-}, 500);
-
-function equipe_renderizar() {
-  equipe_renderizar_api ? equipe_renderizar_api() : _equipe_renderizar_local();
-}
-function _equipe_renderizar_local() {
-  var lista = [];
-  try { lista = JSON.parse(localStorage.getItem('pgm_equipe_v1')) || []; } catch {}
-  var ul = document.getElementById('equipe-lista');
-  if (!ul) return;
-  if (!lista.length) { ul.innerHTML = '<li style="color:var(--text3);font-size:13px">Nenhum membro ainda.</li>'; return; }
-  var colors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
-  ul.innerHTML = lista.map(function(m,i) {
-    var ini = (m.nome||'?').slice(0,2).toUpperCase();
-    var cor = colors[i % colors.length];
-    return '<div class="list-item">'
-      + '<div style="display:flex;align-items:center;gap:10px">'
-      + '<div class="avatar" style="background:' + cor + '">' + ini + '</div>'
-      + '<div><div style="font-size:13px;font-weight:600;color:var(--text)">' + m.nome + '</div>'
-      + '<div style="font-size:11px;color:var(--text3)">' + m.funcao + (m.whatsapp ? ' · ' + m.whatsapp : '') + '</div></div></div>'
-      + '<div style="display:flex;gap:6px">'
-      + '<button class="btn-icon-sm" onclick="equipe_editar(' + i + ')">Editar</button>'
-      + '<button class="btn-icon-sm" onclick="equipe_excluir(' + i + ')" style="color:var(--danger)">Remover</button>'
-      + '</div></div>';
-  }).join('');
-}
-async function equipe_renderizar_api() {
-  var lista = [];
-  try {
-    var r = await fetch('/api/equipe?token=' + getToken());
-    if (r.ok) { var j = await r.json(); lista = j.membros || []; }
-  } catch(e) {
-    try { lista = JSON.parse(localStorage.getItem('pgm_equipe_v1')) || []; } catch {}
-  }
-  var ul = document.getElementById('equipe-lista');
-  if (!ul) return;
-  if (!lista.length) { ul.innerHTML = '<li style="color:var(--text3);font-size:13px">Nenhum membro ainda.</li>'; return; }
-  var colors = ['#3b82f6','#10b981','#f59e0b','#ef4444','#8b5cf6','#06b6d4'];
-  ul.innerHTML = lista.map(function(m,i) {
-    var ini = (m.nome||'?').slice(0,2).toUpperCase();
-    var cor = colors[i % colors.length];
-    var id  = m.id || i;
-    return '<div class="list-item">'
-      + '<div style="display:flex;align-items:center;gap:10px">'
-      + '<div class="avatar" style="background:' + cor + '">' + ini + '</div>'
-      + '<div><div style="font-size:13px;font-weight:600;color:var(--text)">' + m.nome + '</div>'
-      + '<div style="font-size:11px;color:var(--text3)">' + m.funcao + (m.whatsapp ? ' · ' + m.whatsapp : '') + '</div></div></div>'
-      + '<div style="display:flex;gap:6px">'
-      + '<button class="btn-icon-sm" onclick="equipe_editar_api(' + id + ')">Editar</button>'
-      + '<button class="btn-icon-sm" onclick="equipe_excluir_api(' + id + ',"' + m.nome + '")" style="color:var(--danger)">Remover</button>'
-      + '</div></div>';
-  }).join('');
-}
-
-
-function switchTab(e,n){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.ni').forEach(b=>b.classList.remove('active'));document.getElementById(n).classList.add('active');e.currentTarget.classList.add('active');}
-function switchTabByName(n){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.ni').forEach(b=>{if(b.textContent.trim().toLowerCase().startsWith(n.slice(0,4)))b.classList.add('active')});document.getElementById(n).classList.add('active');}
-
-var _isDark = true;
-function toggleDark(){
-  _isDark = !_isDark;
-  if(_isDark){
-    document.documentElement.style.setProperty('--bg','#080c14');
-    document.documentElement.style.setProperty('--surface','#131c2e');
-    document.documentElement.style.setProperty('--surface2','#1a2540');
-    document.documentElement.style.setProperty('--text','#f0f4ff');
-    document.documentElement.style.setProperty('--text2','#8899bb');
-    document.documentElement.style.setProperty('--text3','#4a607a');
-    document.documentElement.style.setProperty('--border','#1e2d45');
-    document.documentElement.style.setProperty('--border2','#263554');
-    document.documentElement.style.setProperty('--bg3','#111827');
-  } else {
-    document.documentElement.style.setProperty('--bg','#f0f4f8');
-    document.documentElement.style.setProperty('--surface','#ffffff');
-    document.documentElement.style.setProperty('--surface2','#f8fafc');
-    document.documentElement.style.setProperty('--text','#0d1117');
-    document.documentElement.style.setProperty('--text2','#4a5568');
-    document.documentElement.style.setProperty('--text3','#8492a6');
-    document.documentElement.style.setProperty('--border','#e4e9f0');
-    document.documentElement.style.setProperty('--border2','#d0d7e3');
-    document.documentElement.style.setProperty('--bg3','#f1f5f9');
-  }
-  localStorage.setItem('pgm-dark',_isDark?'1':'0');
-}
-if(localStorage.getItem('pgm-dark')==='0'){ toggleDark(); }
-
-function buildPagBtn(tipo,page,label,disabled,active){
-  var c='pbtn'+(active?' active':'');
-  return '<button class="'+c+'" onclick="mudarPag("'+tipo+'",'+page+')"'+(disabled?' disabled':'')+'>'+label+'</button>';
-}
-var _origRP=renderPagina;
-function renderPagina(tipo){
-  _origRP(tipo);
-  var pe=document.getElementById('pag-'+tipo);
-  if(!pe)return;
-  var dados=tipo==='critico'?PROXIMOS7:VENCIDOS_DATA;
-  var f=filtroState[tipo];
-  var filtrado=filtrarDados(dados,f);
-  var tp=Math.max(1,Math.ceil(filtrado.length/POR_PAG));
-  var cur=pagState[tipo];
-  var s=Math.max(1,cur-2),e=Math.min(tp,s+4);
-  var btns=buildPagBtn(tipo,cur-1,'&#8249;',cur===1,false);
-  for(var i=s;i<=e;i++)btns+=buildPagBtn(tipo,i,i,false,i===cur);
-  btns+=buildPagBtn(tipo,cur+1,'&#8250;',cur===tp,false);
-  pe.innerHTML='<span>'+filtrado.length+' processos · pag. '+cur+' de '+tp+'</span><div class="pbtns">'+btns+'</div>';
-}
-
-function renderPrazosRecentes(){
-  var c=document.getElementById('prazos-recentes');if(!c)return;
-  var list=(typeof PROXIMOS7!=='undefined'?PROXIMOS7:[]).slice(0,6);
-  if(!list.length){c.innerHTML='<p style="color:var(--text3);font-size:13px">Nenhum prazo critico.</p>';return;}
-  c.innerHTML=list.map(function(r){
-    var d=r.dias||0;
-    var cls=d===0?'pr':d<=2?'pr':d<=4?'pa':'pg';
-    var lbl=d===0?'Hoje':d===1?'Amanha':d+' dias';
-    var bc=d===0?'br':d<=2?'br':d<=4?'ba':'bg';
-    var proc=r.proc||r.processo||'';
-    var resp=r.resp||r.responsavel||'—';
-    return '<div class="pc '+cls+'"><div class="pcdot"></div><div style="flex:1;min-width:0"><div class="pcproc">'+proc+'</div><div class="pcinfo">'+resp+'</div></div><span class="badge '+bc+'">'+lbl+'</span></div>';
-  }).join('');
-}
-
-var _origRD3=renderDashboard;
-function renderDashboard(data){
-  _origRD3(data);
-  renderPrazosRecentes();
-  var nc=document.getElementById('nb-c'),nv=document.getElementById('nb-v');
-  if(nc)nc.textContent=typeof PROXIMOS7!=='undefined'?PROXIMOS7.length:38;
-  if(nv)nv.textContent=typeof VENCIDOS_DATA!=='undefined'?VENCIDOS_DATA.length:376;
-}
-
-async function equipe_renderizar_api(){
-  var lista=[];
-  try{var r=await fetch('/api/equipe?token='+getToken());if(r.ok){var j=await r.json();lista=j.membros||[];}}catch(e){try{lista=JSON.parse(localStorage.getItem('pgm_equipe_v1'))||[];}catch{}}
-  var ul=document.getElementById('equipe-lista');if(!ul)return;
-  if(!lista.length){ul.innerHTML='<li style="color:var(--text3);font-size:13px">Nenhum membro ainda.</li>';return;}
-  var cores=['#3b7fff','#00c875','#ffb300','#ff4757','#8b5cf6','#06b6d4'];
-  ul.innerHTML=lista.map(function(m,i){
-    var ini=(m.nome||'?').slice(0,2).toUpperCase();
-    var id=m.id||i;
-    return '<div class="li"><div style="display:flex;align-items:center;gap:10px"><div class="av" style="background:'+cores[i%cores.length]+'">'+ini+'</div><div><div style="font-size:13px;font-weight:600;color:var(--text)">'+m.nome+'</div><div style="font-size:11px;color:var(--text3)">'+m.funcao+(m.whatsapp?' · '+m.whatsapp:'')+'</div></div></div><div style="display:flex;gap:6px"><button class="bia" onclick="equipe_editar_api('+id+')">Editar</button><button class="bia" onclick="equipe_excluir_api('+id+',"'+m.nome+'")" style="color:var(--red)">Remover</button></div></div>';
-  }).join('');
-}
-function equipe_renderizar(){equipe_renderizar_api();}
-
-setTimeout(renderPrazosRecentes,400);
-setTimeout(function(){
-  var nc=document.getElementById('nb-c'),nv=document.getElementById('nb-v');
-  if(nc)nc.textContent=typeof PROXIMOS7!=='undefined'?PROXIMOS7.length:38;
-  if(nv)nv.textContent=typeof VENCIDOS_DATA!=='undefined'?VENCIDOS_DATA.length:376;
-},500);
 </script>
 </body>
 </html>
