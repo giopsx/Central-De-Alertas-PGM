@@ -622,8 +622,8 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                     const respEl = document.getElementById('select-relatorio-individual');
                     const resp = respEl ? respEl.value.trim() : '';
                     if (!resp) { alert('Selecione um responsavel.'); overlay.classList.remove('show'); return; }
-                    const meusV = VENCIDOS_DATA.filter(r => (r.resp||r.responsavel||'').toUpperCase() === resp.toUpperCase());
-                    const meusP = PROXIMOS7.filter(r => (r.resp||r.responsavel||'').toUpperCase() === resp.toUpperCase());
+                    var meusV = VENCIDOS_DATA.filter(function(r){ return (r.resp||r.responsavel||'').toUpperCase() === resp.toUpperCase(); });
+                    var meusP = PROXIMOS7.filter(function(r){ return (r.resp||r.responsavel||'').toUpperCase() === resp.toUpperCase(); });
                     pdf.autoTable({ startY:y,
                         head:[['Indicador','Valor']],
                         body:[['Responsavel',resp],['Vencidos',meusV.length],['Criticos (7 dias)',meusP.length]],
@@ -636,7 +636,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                         pdf.text('Vencendo nos Proximos 7 Dias', margin, y); y += 4;
                         pdf.autoTable({ startY:y,
                             head:[['Processo','Parte','Prazo','Vence em']],
-                            body:meusP.map(r => { const d=r.dias||0; return [r.proc||'',r.parte||'',r.prazo||'',d===0?'Hoje':d+' dias']; }),
+                            body:meusP.map(function(r){ var d=r.dias||0; return [r.proc||'',r.parte||'',r.prazo||'',d===0?'Hoje':d+' dias']; }),
                             theme:'striped', headStyles:{fillColor:[180,100,0],textColor:255,fontSize:8},
                             bodyStyles:{fontSize:8}, margin:{left:margin,right:margin}
                         });
@@ -647,7 +647,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                         pdf.text('Prazos Vencidos', margin, y); y += 4;
                         pdf.autoTable({ startY:y,
                             head:[['Processo','Parte','Prazo','Dias']],
-                            body:meusV.map(r => [r.proc||'',r.parte||'',r.prazo||'',r.dias+'d']),
+                            body:meusV.map(function(r){ return [r.proc||'',r.parte||'',r.prazo||'',r.dias+'d']; }),
                             theme:'striped', headStyles:{fillColor:[200,30,30],textColor:255,fontSize:8},
                             bodyStyles:{fontSize:8}, margin:{left:margin,right:margin}
                         });
