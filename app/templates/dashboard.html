@@ -378,13 +378,23 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
       <div class="kc-sub">nao cumpridos</div>
       <div class="kc-bar"></div>
     </div>
-    <div class="kc amber">
+    <div class="kc red" style="cursor:pointer" onclick="switchTab(null,'hoje')">
+      <div class="kc-glow"></div>
+      <div class="kc-top">
+        <span class="kc-lbl">Vence Hoje</span>
+        <div class="kc-ico"><svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
+      </div>
+      <div class="kc-val" id="kpi-hoje">0</div>
+      <div class="kc-sub">vence hoje</div>
+      <div class="kc-bar"></div>
+    </div>
+    <div class="kc amber" style="cursor:pointer" onclick="switchTab(null,'criticos')">
       <div class="kc-glow"></div>
       <div class="kc-top">
         <span class="kc-lbl">Proximos 7 dias</span>
         <div class="kc-ico"><svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div>
       </div>
-      <div class="kc-val" id="kpi-proximos">38</div>
+      <div class="kc-val" id="kpi-proximos">0</div>
       <div class="kc-sub">atencao urgente</div>
       <div class="kc-bar"></div>
     </div>
@@ -533,7 +543,24 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
       Alertar Todos
     </button>
   </div>
-  <div class="fb"><div class="sw"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="filtro-vencido" type="text" placeholder="Buscar processo, responsavel ou parte..."></div><select id="resp-vencido" class="fsel"><option value="">Todos responsaveis</option><option value="AMBIENTAL">Ambiental</option><option value="BEATRIZ">Beatriz</option><option value="COMCEP">Comcep</option><option value="DISTRIBUIR">Distribuir</option><option value="ERICA">Erica</option><option value="FISCAL">Fiscal</option><option value="GECILENE">Gecilene</option><option value="JEFFERSON">Jefferson</option><option value="KAMILA">Kamila</option><option value="KARYTHA">Karytha</option><option value="LEONARDO">Leonardo</option><option value="MAURICIO">Mauricio</option><option value="MIRTON">Mirton</option><option value="REGIA">Regia</option><option value="YOUSSEF">Youssef</option></select><select id="vara-vencido" class="fsel"><option value="">Todas as varas</option><option value="10ª Vara Cível">10ª Vara Cível</option><option value="11ª Turma/Gab">11ª Turma/Gab</option><option value="11ª Turma/Gab. 33 - DESEMBARGADOR FEDERA">11ª Turma/Gab. 33 - DESEMBARGADOR FEDERA</option><option value="12ª Turma/Gab. 36 - DESEMBARGADORA FEDER">12ª Turma/Gab. 36 - DESEMBARGADORA FEDER</option><option value="1ª Câmara Especial">1ª Câmara Especial</option><option value="1ª Câmara Especial/Gabinete Des. Gilbert">1ª Câmara Especial/Gabinete Des. Gilbert</option><option value="1ª Vara Cível">1ª Vara Cível</option><option value="1ª Vara Federal Cível">1ª Vara Federal Cível</option><option value="1ª Vara Federal Cível da SJRO">1ª Vara Federal Cível da SJRO</option><option value="1ª Vara de Fazenda Pública">1ª Vara de Fazenda Pública</option><option value="1ª Vara de Fazenda e Saúde Pública">1ª Vara de Fazenda e Saúde Pública</option><option value="2ª Câmara Especial">2ª Câmara Especial</option><option value="2ª Câmara Especial/Gabinete Titularidade">2ª Câmara Especial/Gabinete Titularidade</option><option value="2ª Vara Federal">2ª Vara Federal</option><option value="2ª Vara Federal Cível">2ª Vara Federal Cível</option><option value="2ª Vara Federal Cível da SJRO">2ª Vara Federal Cível da SJRO</option><option value="2ª Vara de Fazenda e Saúde Pública">2ª Vara de Fazenda e Saúde Pública</option><option value="3ª Vara Cível">3ª Vara Cível</option><option value="4ª Vara Cível">4ª Vara Cível</option><option value="4ª Vara Federal de Juizado Especial Cíve">4ª Vara Federal de Juizado Especial Cíve</option><option value="5ª Turma/Gab. 13 - DESEMBARGADOR FEDERAL">5ª Turma/Gab. 13 - DESEMBARGADOR FEDERAL</option><option value="5ª Turma/Gab. 15 - DESEMBARGADOR FEDERAL">5ª Turma/Gab. 15 - DESEMBARGADOR FEDERAL</option><option value="5ª Vara Cível">5ª Vara Cível</option><option value="6ª Turma/Gab">6ª Turma/Gab</option><option value="6ª Turma/Gab. 16 - DESEMBARGADOR FEDERAL">6ª Turma/Gab. 16 - DESEMBARGADOR FEDERAL</option><option value="6ª Vara Federal">6ª Vara Federal</option><option value="6ª Vara Federal de Juizado Especial Cíve">6ª Vara Federal de Juizado Especial Cíve</option><option value="7ª Vara Cível">7ª Vara Cível</option><option value="8ª Vara Cível">8ª Vara Cível</option><option value="9ª Vara Cível">9ª Vara Cível</option><option value="Cerejeiras - 2ª Vara Genérica">Cerejeiras - 2ª Vara Genérica</option><option value="EXECUÇÃO FISCAL">EXECUÇÃO FISCAL</option><option value="Gabinete Des. Gilberto Barbosa">Gabinete Des. Gilberto Barbosa</option><option value="Gabinete Des. Miguel Monico">Gabinete Des. Miguel Monico</option><option value="Ji-Paraná - 5ª Vara Cível">Ji-Paraná - 5ª Vara Cível</option><option value="Juizado Especial Cível e Criminal Adjunt">Juizado Especial Cível e Criminal Adjunt</option><option value="Presidência do TJRO">Presidência do TJRO</option><option value="STJ">STJ</option><option value="Vice Presidência/Gab. Vice Presidência">Vice Presidência/Gab. Vice Presidência</option></select><button onclick="exportarXlsx('vencido')" class="xbtn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Excel</button></div>
+  <div class="fb" style="flex-wrap:wrap;gap:8px">
+  <div class="sw" style="flex:1;min-width:180px">
+    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="filtro-critico" type="text" placeholder="Buscar processo, responsavel ou parte...">
+  </div>
+  <select id="resp-critico" class="fsel" style="min-width:160px">
+    <option value="">Todos responsaveis</option>
+  </select>
+  <div style="display:flex;align-items:center;gap:6px">
+    <label style="font-size:12px;color:var(--text2);white-space:nowrap">Prazo:</label>
+    <input id="data-critico" type="date" class="fsel" style="padding:7px 10px;cursor:pointer" title="Filtrar por data de vencimento">
+    <button onclick="document.getElementById('data-critico').value='';filtroState.critico.data='';pagState.critico=1;renderPagina('critico')" title="Limpar data" style="padding:6px 8px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-size:11px">✕</button>
+  </div>
+  <button onclick="exportarXlsx('critico')" class="xbtn">
+    <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+    Excel
+  </button>
+</div>
   <div class="tw"><table>
     <thead><tr><th>Processo</th><th>Parte</th><th>Responsavel</th><th>Prazo</th><th>Dias Vencido</th><th>Vara</th><th>Acoes</th></tr></thead>
     <tbody id="tbody-vencidos"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
@@ -1365,10 +1392,19 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
         function filtrarDados(dados, f) {
             return dados.filter(function(r) {
                 var hay = ((r.proc||r.processo) + (r.parte||'') + (r.resp||r.responsavel||'') + (r.vara||'')).toLowerCase();
-                var txt = f.texto ? hay.indexOf(f.texto.toLowerCase()) >= 0 : true;
-                var resp = f.resp ? (r.resp||r.responsavel||'') === f.resp : true;
-                var vara = f.vara ? (r.vara||'').indexOf(f.vara) >= 0 : true;
-                return txt && resp && vara;
+                var txt  = f.texto ? hay.indexOf(f.texto.toLowerCase()) >= 0 : true;
+                var resp = f.resp  ? (r.resp||r.responsavel||'').toUpperCase() === f.resp.toUpperCase() : true;
+                var vara = f.vara  ? (r.vara||'').indexOf(f.vara) >= 0 : true;
+                // Filtro de data: comparar prazo dd/mm/yyyy com data selecionada yyyy-mm-dd
+                var data = true;
+                if (f.data && f.data !== '') {
+                    try {
+                        var p = (r.prazo||'').split('/');
+                        var prazoISO = p[2]+'-'+p[1]+'-'+p[0];
+                        data = prazoISO === f.data;
+                    } catch(e) { data = true; }
+                }
+                return txt && resp && vara && data;
             });
         }
 
@@ -1631,10 +1667,11 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                 }
             } catch(e) {}
 
-            // 3. Popular cache de contatos para WhatsApp
+            // 3. Popular cache de contatos para WhatsApp (so membros ativos)
             if (!_contatosCache) _contatosCache = {};
             lista.forEach(function(m) {
-                if (m.nome && m.whatsapp) _contatosCache[m.nome.toUpperCase()] = m.whatsapp;
+                if (m.nome && m.whatsapp && m.ativo !== false)
+                    _contatosCache[m.nome.toUpperCase()] = m.whatsapp;
             });
 
             var ul = document.getElementById('equipe-lista');
@@ -1645,18 +1682,24 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
             }
             var cores = ['#3b7fff','#00c875','#ffb300','#ff4757','#8b5cf6','#06b6d4'];
             ul.innerHTML = lista.map(function(m, i) {
-                var ini = (m.nome || '?').slice(0, 2).toUpperCase();
-                var id  = m.id != null ? m.id : i;
-                var idf = JSON.stringify(id);
-                var nomef = JSON.stringify(m.nome || '');
-                return '<div class="li">' +
-                    '<div style="display:flex;align-items:center;gap:10px">' +
-                    '<div class="av" style="background:' + cores[i % cores.length] + '">' + ini + '</div>' +
+                var ini  = (m.nome || '?').slice(0, 2).toUpperCase();
+                var id   = m.id != null ? m.id : i;
+                var idf  = JSON.stringify(id);
+                var nomef= JSON.stringify(m.nome || '');
+                var ativo= m.ativo !== false; // default true se nao definido
+                var avBg = ativo ? cores[i % cores.length] : '#64748b';
+                var badgeHtml = ativo
+                    ? ''
+                    : '<span style="font-size:10px;font-weight:700;background:rgba(100,116,139,.15);color:#94a3b8;border-radius:4px;padding:1px 6px;margin-left:6px">INATIVO</span>';
+                return '<div class="li" style="opacity:' + (ativo?'1':'0.55') + '">' +
+                    '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
+                    '<div class="av" style="background:' + avBg + '">' + ini + '</div>' +
                     '<div>' +
-                    '<div style="font-size:13px;font-weight:600;color:var(--text)">' + m.nome + '</div>' +
-                    '<div style="font-size:11px;color:var(--text3)">' + m.funcao + (m.whatsapp ? ' · ' + m.whatsapp : '') + '</div>' +
+                    '<div style="font-size:13px;font-weight:600;color:var(--text)">' + m.nome + badgeHtml + '</div>' +
+                    '<div style="font-size:11px;color:var(--text3)">' + (m.funcao||'') + (m.whatsapp ? ' · ' + m.whatsapp : '') + '</div>' +
                     '</div></div>' +
-                    '<div style="display:flex;gap:6px">' +
+                    '<div style="display:flex;align-items:center;gap:6px">' +
+                    '<button class="bia" title="' + (ativo?'Marcar inativo':'Marcar ativo') + '" onclick="equipe_toggle_ativo(' + idf + ',' + !ativo + ')" style="font-size:11px;color:' + (ativo?'var(--text2)':'#3b7fff') + '">' + (ativo?'Inativar':'Ativar') + '</button>' +
                     '<button class="bia" onclick="equipe_editar_local(' + idf + ')">Editar</button>' +
                     '<button class="bia" onclick="equipe_excluir_local(' + idf + ',' + nomef + ')" style="color:var(--red)">Remover</button>' +
                     '</div></div>';
@@ -1679,6 +1722,28 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                 if (b) b.style.display = 'inline-flex';
                 document.getElementById('eq-nome').scrollIntoView({ behavior:'smooth' });
             } catch(e) { alert('Erro ao editar: ' + e.message); }
+        }
+
+        async function equipe_toggle_ativo(id, novoAtivo) {
+            var token = getToken();
+            try {
+                var res = await fetch('/api/equipe/' + id + '?token=' + token, {
+                    method: 'PUT',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ ativo: novoAtivo })
+                });
+                if (res.ok) {
+                    try {
+                        var lista = JSON.parse(localStorage.getItem('pgm_equipe_v1') || '[]');
+                        lista = lista.map(function(m){
+                            if (m.id === id) m.ativo = novoAtivo;
+                            return m;
+                        });
+                        localStorage.setItem('pgm_equipe_v1', JSON.stringify(lista));
+                    } catch(e) {}
+                    await equipe_renderizar();
+                } else { alert('Erro ao atualizar status.'); }
+            } catch(e) { alert('Erro de conexao.'); }
         }
 
         function equipe_excluir_local(id, nome) {
@@ -1793,7 +1858,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
         // Dados carregados via API pelo loadDashboard()
         var POR_PAG = 25;
         var pagState = { hoje: 1, critico: 1, vencido: 1 };
-        var filtroState = { hoje:{texto:'',resp:'',vara:''}, critico:{texto:'',resp:'',vara:''}, vencido:{texto:'',resp:'',vara:''} };
+        var filtroState = { hoje:{texto:'',resp:'',vara:''}, critico:{texto:'',resp:'',vara:'',data:''}, vencido:{texto:'',resp:'',vara:''} };
 
         function filtrarDados(dados,f){
             return dados.filter(function(r){
@@ -2009,6 +2074,15 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
         }
 
         function initFiltros(){
+            // Filtro de data da aba criticos
+            var dataCritico = document.getElementById('data-critico');
+            if (dataCritico) {
+                dataCritico.addEventListener('change', function() {
+                    filtroState.critico.data = this.value;
+                    pagState.critico = 1;
+                    renderPagina('critico');
+                });
+            }
             [['filtro-hoje','resp-hoje','vara-hoje','hoje'],['filtro-critico','resp-critico','vara-critico','critico'],['filtro-vencido','resp-vencido','vara-vencido','vencido']].forEach(function(g){
                 var ft=document.getElementById(g[0]),rs=document.getElementById(g[1]),vs=document.getElementById(g[2]),t=g[3];
                 if(ft) ft.addEventListener('input',function(){ filtroState[t].texto=this.value; pagState[t]=1; renderPagina(t); });
@@ -2046,6 +2120,26 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                 VENCIDOS_DATA = venc;
             }
             renderPagina('hoje'); renderPagina('critico'); renderPagina('vencido');
+            // Atualizar KPI do dashboard
+            var elH=document.getElementById('kpi-hoje');
+            if(elH) elH.textContent=HOJE_DATA.length||'0';
+            // Popular select de responsaveis da aba criticos com dados reais
+            var selRC = document.getElementById('resp-critico');
+            if (selRC) {
+                var cur = selRC.value;
+                var resps = {};
+                PROXIMOS7.forEach(function(r){ if(r.resp) resps[r.resp]=1; });
+                // Manter opcoes existentes e adicionar novas
+                var optsAtuais = Array.from(selRC.options).map(function(o){return o.value;});
+                Object.keys(resps).sort().forEach(function(resp) {
+                    if (optsAtuais.indexOf(resp) < 0) {
+                        var opt = document.createElement('option');
+                        opt.value = resp; opt.textContent = resp;
+                        selRC.appendChild(opt);
+                    }
+                });
+                if (cur) selRC.value = cur;
+            }
         }
 
         function renderTabelaPerf(perf){
@@ -2074,6 +2168,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
                 renderChart(pl); renderTabelaPerf(pl);
             }
             ['total','vencidos','proximos','cumpridos'].forEach(function(k){ var el=document.getElementById('kpi-'+k); if(el) el.textContent=kpis[k]; });
+            var elHoje=document.getElementById('kpi-hoje'); if(elHoje) elHoje.textContent=HOJE_DATA.length||'0';
             var tx=document.getElementById('kpi-taxa-label'); if(tx) tx.textContent=(kpis.taxa||41.7)+'% de taxa';
             renderPagina('critico'); renderPagina('vencido'); renderPrazosRecentes();
             var nh=document.getElementById('nb-hoje'),nc=document.getElementById('nb-c'),nv=document.getElementById('nb-v');
