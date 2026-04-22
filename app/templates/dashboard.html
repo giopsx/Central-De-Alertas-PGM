@@ -1,143 +1,260 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <meta name="robots" content="noindex,nofollow">
-    <title>Subprocuradoria Contenciosa — PGM Porto Velho</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-    <style>
-        :root{
-            --bg:#080c14; --bg2:#0d1220; --bg3:#111827; --surface:#131c2e; --surface2:#1a2540;
-            --border:#1e2d45; --border2:#263554; --text:#f0f4ff; --text2:#8899bb; --text3:#4a607a;
-            --accent:#3b7fff; --accent2:#5b9aff; --accent-glow:rgba(59,127,255,.18);
-            --red:#ff4757; --red-dim:rgba(255,71,87,.12); --amber:#ffb300; --amber-dim:rgba(255,179,0,.12);
-            --green:#00c875; --green-dim:rgba(0,200,117,.12); --r:14px; --r2:10px;
-        }
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
-        .hdr{background:rgba(8,12,20,.92);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:200;backdrop-filter:blur(10px)}
-        .hdr-in{max-width:1400px;margin:0 auto;padding:0 28px;height:62px;display:flex;align-items:center;gap:20px}
-        .hdr-logo{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px}
-        .hdr-title{flex:1;text-align:center;color:var(--text2);font-size:13px}
-        .layout{display:flex;max-width:1400px;margin:0 auto;padding:24px 28px;gap:20px}
-        .sdb{width:210px;flex-shrink:0}
-        .ni{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--r2);color:var(--text2);cursor:pointer;background:none;border:none;width:100%;text-align:left;font-family:inherit}
-        .ni.active{background:var(--surface2);color:var(--accent2);font-weight:600;border:1px solid var(--border2)}
-        .main{flex:1;min-width:0}
-        .tab-content{display:none} .tab-content.active{display:block}
-        .kg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
-        .kc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
-        .kc-val{font-size:32px;font-weight:800;margin:10px 0}
-        .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
-        table{width:100%;border-collapse:collapse}
-        th{text-align:left;padding:10px;font-size:11px;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)}
-        td{padding:10px;font-size:12px;border-bottom:1px solid var(--border2)}
-        .badge{padding:3px 8px;border-radius:10px;font-size:10px;font-weight:700}
-        .br{background:var(--red-dim);color:var(--red)} .ba{background:var(--amber-dim);color:var(--amber)} .bg{background:var(--green-dim);color:var(--green)}
-        .btn{padding:10px 20px;border-radius:var(--r2);cursor:pointer;font-weight:600;border:none;font-family:inherit}
-        .btn-blue{background:var(--accent);color:#fff}
-        .fi{width:100%;padding:10px;background:var(--bg2);border:1px solid var(--border);color:#fff;border-radius:var(--r2);margin-bottom:10px}
-        #pdf-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:999;align-items:center;justify-content:center;color:#fff}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Subprocuradoria Contenciosa — PGM Porto Velho</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* RESTAURANDO O TEU DESIGN ORIGINAL "PRO" */
+:root{
+  --bg:#080c14; --bg2:#0d1220; --bg3:#111827; --surface:#131c2e; --surface2:#1a2540;
+  --border:#1e2d45; --border2:#263554; --text:#f0f4ff; --text2:#8899bb; --text3:#4a607a;
+  --accent:#3b7fff; --accent2:#5b9aff; --accent-glow:rgba(59,127,255,.18);
+  --red:#ff4757; --red-dim:rgba(255,71,87,.12); --amber:#ffb300; --amber-dim:rgba(255,179,0,.12);
+  --green:#00c875; --green-dim:rgba(0,200,117,.12); --r:14px; --r2:10px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+
+/* HEADER ORIGINAL */
+.hdr{background:rgba(8,12,20,.92);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);position:sticky;top:0;z-index:200}
+.hdr-in{max-width:1400px;margin:0 auto;padding:0 28px;height:62px;display:flex;align-items:center;gap:20px}
+.hdr-logo{display:flex;align-items:center;gap:10px}
+.hdr-emblem{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#3b7fff);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(59,127,255,.4)}
+.hdr-brand{font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.02em}
+
+/* LAYOUT E SIDEBAR ORIGINAIS */
+.layout{display:flex;max-width:1400px;margin:0 auto;padding:24px 28px;gap:20px}
+.sdb{width:210px;flex-shrink:0}
+.ni{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:var(--r2);color:var(--text2);cursor:pointer;background:none;border:none;width:100%;text-align:left;font-family:inherit;transition:all .15s}
+.ni.active{background:var(--surface2);color:var(--accent2);font-weight:600;border:1px solid var(--border2)}
+
+/* KPI CARDS COM EFEITO GLOW */
+.kg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
+.kc-glow{position:absolute;top:-40px;right:-40px;width:100px;height:100px;border-radius:50%;opacity:.6;filter:blur(30px)}
+.kc.blue .kc-glow{background:var(--accent)} .kc.red .kc-glow{background:var(--red)} .kc.amber .kc-glow{background:var(--amber)} .kc.green .kc-glow{background:var(--green)}
+.kc-val{font-size:36px;font-weight:800;line-height:1;margin:10px 0}
+
+/* ESTILOS DE TABELA E BOTÕES */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
+table{width:100%;border-collapse:collapse}
+th{padding:10px;text-align:left;font-size:11px;color:var(--text3);text-transform:uppercase;border-bottom:1px solid var(--border)}
+td{padding:10px;font-size:12px;border-bottom:1px solid var(--border2)}
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.br{background:var(--red-dim);color:var(--red)} .ba{background:var(--amber-dim);color:var(--amber)} .bg{background:var(--green-dim);color:var(--green)}
+.btn-blue{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:var(--r2);font-weight:600;cursor:pointer}
+.fi{width:100%;padding:10px;background:var(--surface);border:1px solid var(--border);color:#fff;border-radius:var(--r2);margin-bottom:10px}
+</style>
 </head>
 <body>
 
-<div id="pdf-overlay">Gerando PDF...</div>
-
 <header class="hdr">
-    <div class="hdr-in">
-        <div class="hdr-logo">⚖️ Subprocuradoria Contenciosa</div>
-        <div class="hdr-title">Gestão de Prazos Processuais</div>
-        <div style="font-size:11px;color:var(--green)">● Sistema Ativo</div>
+  <div class="hdr-in">
+    <div class="hdr-logo">
+      <div class="hdr-emblem"><span style="color:white;font-weight:bold">⚖️</span></div>
+      <div class="hdr-brand">Subprocuradoria Contenciosa</div>
     </div>
+    <div style="flex:1;text-align:center;color:var(--text2)">Controle de Prazos Processuais</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text3)">
+      <div style="width:6px;height:6px;background:var(--green);border-radius:50%"></div>
+      <span>Sistema ativo</span>
+    </div>
+  </div>
 </header>
 
 <div class="layout">
-    <aside class="sdb">
-        <button class="ni active" onclick="switchTab(event,'dashboard')">Dashboard</button>
-        <button class="ni" onclick="switchTab(event,'import')">Importar Planilha</button>
-        <button class="ni" onclick="switchTab(event,'criticos')">Críticos</button>
-        <button class="ni" onclick="switchTab(event,'vencidos')">Vencidos</button>
-        <button class="ni" onclick="switchTab(event,'equipe')">Equipe</button>
-    </aside>
+  <aside class="sdb">
+    <button class="ni active" onclick="switchTab(event,'dashboard')">Dashboard</button>
+    <button class="ni" onclick="switchTab(event,'import')">Importar</button>
+    <button class="ni" onclick="switchTab(event,'criticos')">Críticos</button>
+    <button class="ni" onclick="switchTab(event,'vencidos')">Vencidos</button>
+    <button class="ni" onclick="switchTab(event,'equipe')">Equipe</button>
+  </aside>
 
-    <main class="main">
-        <div id="dashboard" class="tab-content active">
-            <div style="margin-bottom:20px">
-                <h2>Dashboard</h2>
-                <p style="color:var(--text3)">Visão geral · <span id="data-atual-header">--/--/----</span></p>
-            </div>
-            <div class="kg">
-                <div class="kc"><div>Total</div><div class="kc-val" id="kpi-total">0</div></div>
-                <div class="kc" style="color:var(--red)"><div>Vencidos</div><div class="kc-val" id="kpi-vencidos">0</div></div>
-                <div class="kc" style="color:var(--amber)"><div>Próximos</div><div class="kc-val" id="kpi-proximos">0</div></div>
-                <div class="kc" style="color:var(--green)"><div>Cumpridos</div><div class="kc-val" id="kpi-cumpridos">0</div></div>
-            </div>
-            <div class="card">
-                <h3>Performance por Responsável</h3>
-                <canvas id="chart-performance" style="max-height:250px"></canvas>
-            </div>
-        </div>
+  <main style="flex:1;min-width:0">
+    <div id="dashboard" class="tab-content active">
+      <div style="margin-bottom:24px">
+        <h2 style="font-size:24px;font-weight:800">Dashboard</h2>
+        <p style="color:var(--text3)">Visão geral · <span id="data-header">--/--/----</span></p>
+      </div>
+      <div class="kg">
+        <div class="kc blue"><div class="kc-glow"></div><div style="font-size:11px;color:var(--text3)">TOTAL</div><div class="kc-val" id="kpi-total">0</div></div>
+        <div class="kc red"><div class="kc-glow"></div><div style="font-size:11px;color:var(--text3)">VENCIDOS</div><div class="kc-val" id="kpi-vencidos">0</div></div>
+        <div class="kc amber"><div class="kc-glow"></div><div style="font-size:11px;color:var(--text3)">PRÓXIMOS 7 DIAS</div><div class="kc-val" id="kpi-proximos">0</div></div>
+        <div class="kc green"><div class="kc-glow"></div><div style="font-size:11px;color:var(--text3)">CUMPRIDOS</div><div class="kc-val" id="kpi-cumpridos">0</div></div>
+      </div>
+      <div class="card">
+        <h3>Performance por Responsável</h3>
+        <canvas id="chart-performance" style="max-height:250px"></canvas>
+      </div>
+    </div>
 
-        <div id="import" class="tab-content">
-            <div class="card">
-                <h3>Importar Dados</h3>
-                <form id="importForm" style="margin-top:15px">
-                    <input type="file" id="fileInput" class="fi" accept=".xlsx">
-                    <button type="submit" class="btn btn-blue" id="btnUpload">Fazer Upload</button>
-                </form>
-            </div>
+    <div id="equipe" class="tab-content" style="display:none">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+        <div class="card">
+          <h3>Novo Membro</h3>
+          <input type="text" id="eq-nome" class="fi" placeholder="Nome">
+          <input type="tel" id="eq-whatsapp" class="fi" placeholder="WhatsApp (Ex: 55699...)">
+          <button class="btn-blue" style="width:100%" onclick="salvarMembro()">Salvar Membro</button>
         </div>
+        <div class="card">
+          <h3>Membros</h3>
+          <div id="lista-equipe"></div>
+        </div>
+      </div>
+    </div>
 
-        <div id="criticos" class="tab-content">
-            <h3>Prazos Críticos (Próximos 7 dias)</h3>
-            <div class="card" style="margin-top:15px">
-                <table>
-                    <thead><tr><th>Processo</th><th>Responsável</th><th>Prazo</th><th>Status</th><th>Ações</th></tr></thead>
-                    <tbody id="tbody-proximos"></tbody>
-                </table>
-            </div>
-        </div>
+    <div id="import" class="tab-content" style="display:none">
+      <div class="card">
+        <h3>Importar Planilha XLSX</h3>
+        <form id="importForm" style="margin-top:15px">
+          <input type="file" id="fileInput" class="fi" accept=".xlsx">
+          <button type="submit" class="btn-blue" id="btnUpload" style="width:100%">Fazer Upload</button>
+        </form>
+      </div>
+    </div>
 
-        <div id="vencidos" class="tab-content">
-            <h3>Prazos Vencidos</h3>
-            <div class="card" style="margin-top:15px">
-                <table>
-                    <thead><tr><th>Processo</th><th>Responsável</th><th>Vencimento</th><th>Ações</th></tr></thead>
-                    <tbody id="tbody-vencidos"></tbody>
-                </table>
-            </div>
-        </div>
+    <div id="criticos" class="tab-content" style="display:none">
+      <h3>Processos Críticos (7 Dias)</h3>
+      <div class="card" style="margin-top:15px">
+        <table>
+          <thead><tr><th>Processo</th><th>Responsável</th><th>Prazo</th><th>Status</th><th>Ações</th></tr></thead>
+          <tbody id="tbody-proximos"></tbody>
+        </table>
+      </div>
+    </div>
 
-        <div id="equipe" class="tab-content">
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
-                <div class="card">
-                    <h3>Cadastrar Membro</h3>
-                    <input type="text" id="eq-nome" class="fi" placeholder="Nome">
-                    <input type="tel" id="eq-whatsapp" class="fi" placeholder="WhatsApp (DDD+Número)">
-                    <button class="btn btn-blue" onclick="salvarMembro()">Salvar</button>
-                </div>
-                <div class="card">
-                    <h3>Membros Cadastrados</h3>
-                    <div id="lista-equipe"></div>
-                </div>
-            </div>
-        </div>
-    </main>
+    <div id="vencidos" class="tab-content" style="display:none">
+      <h3>Processos Vencidos</h3>
+      <div class="card" style="margin-top:15px">
+        <table>
+          <thead><tr><th>Processo</th><th>Responsável</th><th>Prazo</th><th>Vencimento</th><th>Ações</th></tr></thead>
+          <tbody id="tbody-vencidos"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
 </div>
 
 <script>
-    const token = new URLSearchParams(window.location.search).get('token') || 'pgm-contenciosa-2026';
-    let chartInstance = null;
+const token = new URLSearchParams(window.location.search).get('token') || 'pgm-contenciosa-2026';
+let chart = null;
 
-    // --- NAVEGAÇÃO ---
-    function switchTab(e, tabId) {
-        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active');
-        if(e) e.currentTarget.classList.add('active');
+// NAVEGAÇÃO
+function switchTab(e, id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).style.display = 'block';
+  if(e) e.currentTarget.classList.add('active');
+  if(id === 'dashboard') loadDashboard();
+  if(id === 'criticos' || id === 'vencidos') loadCriticos();
+  if(id === 'equipe') renderEquipe();
+}
+
+// DASHBOARD
+async function loadDashboard() {
+  document.getElementById('data-header').textContent = new Date().toLocaleDateString('pt-BR');
+  const res = await fetch(`/api/dashboard?token=${token}`);
+  const data = await res.json();
+  if (data.stats) {
+    document.getElementById('kpi-total').textContent = data.stats.total || 0;
+    document.getElementById('kpi-vencidos').textContent = data.stats.vencidos || 0;
+    document.getElementById('kpi-proximos').textContent = data.stats.proximos || 0;
+    document.getElementById('kpi-cumpridos').textContent = data.stats.cumpridos || 0;
+    renderChart(data.performance || []);
+  }
+}
+
+function renderChart(perf) {
+  const ctx = document.getElementById('chart-performance').getContext('2d');
+  if(chart) chart.destroy();
+  chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: perf.map(p => p.responsavel),
+      datasets: [{ label: '% Cumprimento', data: perf.map(p => p.taxa), backgroundColor: '#3b7fff' }]
+    },
+    options: { indexAxis: 'y', scales: { x: { max: 100 } } }
+  });
+}
+
+// LISTAS
+async function loadCriticos() {
+  const res = await fetch(`/api/criticos?token=${token}`);
+  const data = await res.json();
+  const tbP = document.getElementById('tbody-proximos');
+  const tbV = document.getElementById('tbody-vencidos');
+  
+  tbP.innerHTML = (data.proximos || []).map(p => `
+    <tr>
+      <td><b>${p.processo}</b></td>
+      <td>${p.responsavel}</td>
+      <td>${p.prazo}</td>
+      <td><span class="badge ba">Em ${p.dias} dias</span></td>
+      <td><button onclick="enviarWpp('${p.processo}','${p.responsavel}','${p.prazo}')">📱</button></td>
+    </tr>
+  `).join('');
+
+  tbV.innerHTML = (data.vencidos || []).map(v => `
+    <tr>
+      <td><b>${v.processo}</b></td>
+      <td>${v.responsavel}</td>
+      <td>${v.prazo}</td>
+      <td><span class="badge br">${Math.abs(v.dias)} dias atrás</span></td>
+      <td><button onclick="enviarWpp('${v.processo}','${v.responsavel}','${v.prazo}')">📱</button></td>
+    </tr>
+  `).join('');
+}
+
+// WHATSAPP (Bypass Firewall Fortinet)
+async function enviarWpp(proc, resp, prazo) {
+  const membros = JSON.parse(localStorage.getItem('pgm_equipe_v1') || '[]');
+  const m = membros.find(x => x.nome.toUpperCase() === resp.toUpperCase());
+  if(!m || !m.whatsapp) return alert("WhatsApp não cadastrado para " + resp);
+  const msg = encodeURIComponent(`⚖️ *ALERTA PGM*\nOlá ${resp}, o processo *${proc}* está com prazo para ${prazo}.`);
+  window.open(`https://api.whatsapp.com/send?phone=${m.whatsapp.replace(/\D/g,'')}&text=${msg}`, '_blank');
+}
+
+// EQUIPE (Híbrido)
+function salvarMembro() {
+  const nome = document.getElementById('eq-nome').value.trim();
+  const zap = document.getElementById('eq-whatsapp').value.trim();
+  if(!nome || !zap) return alert("Preencha os campos!");
+  let lista = JSON.parse(localStorage.getItem('pgm_equipe_v1') || '[]');
+  lista.push({nome, whatsapp: zap});
+  localStorage.setItem('pgm_equipe_v1', JSON.stringify(lista));
+  fetch(`/api/equipe?token=${token}`, { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({nome, whatsapp: zap}) });
+  renderEquipe();
+}
+
+function renderEquipe() {
+  const lista = JSON.parse(localStorage.getItem('pgm_equipe_v1') || '[]');
+  document.getElementById('lista-equipe').innerHTML = lista.map(m => `
+    <div style="padding:10px; border-bottom:1px solid var(--border)">
+      <b>${m.nome}</b> - ${m.whatsapp}
+    </div>
+  `).join('');
+}
+
+// UPLOAD
+document.getElementById('importForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const file = document.getElementById('fileInput').files[0];
+  const fd = new FormData();
+  fd.append('file', file);
+  document.getElementById('btnUpload').textContent = "Processando...";
+  await fetch(`/api/upload?token=${token}`, { method: 'POST', body: fd });
+  alert("Importado com sucesso!");
+  document.getElementById('btnUpload').textContent = "Fazer Upload";
+  loadDashboard();
+};
+
+window.onload = loadDashboard;
+</script>
+</body>
+</html>
