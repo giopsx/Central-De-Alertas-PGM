@@ -225,17 +225,20 @@ def get_dashboard():
     stats = cache_get('stats')
     if not stats: return jsonify({'sem_dados':True})
     perf = cache_get('performance') or []
-    # Mostrar APENAS servidores cadastrados na equipe E ativos
+    # Mostrar APENAS servidores cadastrados na equipe (ativos ou sem campo ativo)
     try:
         membros_raw = _sb_get('equipe', 'select=nome,ativo')
-        if membros_raw:
-            ativos = set(
-                m['nome'].upper() for m in membros_raw
-                if isinstance(m, dict) and m.get('ativo') is not False
+        if membros_raw and isinstance(membros_raw, list):
+            cadastrados = set(
+                m['nome'].strip().upper() for m in membros_raw
+                if isinstance(m, dict) and m.get('nome')
+                and m.get('ativo') is not False
             )
-            perf = [p for p in perf if p.get('responsavel','').upper() in ativos]
-    except Exception:
-        pass
+            if cadastrados:
+                perf = [p for p in perf
+                        if p.get('responsavel','').strip().upper() in cadastrados]
+    except Exception as e:
+        print(f'[WARN] filtro equipe falhou: {e}')
     return jsonify({'stats':stats,'performance':perf,
                     'filename':cache_get('filename') or ''})
 
