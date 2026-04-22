@@ -2115,22 +2115,28 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
         }
 
         function renderDashboard(data){
-            var kpis={total:938,vencidos:VENCIDOS_DATA.length,proximos:PROXIMOS7.length,cumpridos:391,taxa:41.7};
             if(data&&!data.sem_dados&&data.stats){
-                kpis=data.stats;
+                var kpis=data.stats;
+                ['total','vencidos','proximos','cumpridos'].forEach(function(k){
+                    var el=document.getElementById('kpi-'+k); if(el) el.textContent=kpis[k]||0;
+                });
+                var tx=document.getElementById('kpi-taxa-label');
+                if(tx) tx.textContent=(kpis.taxa||0)+'% de taxa';
                 if(data.performance){ renderChart(data.performance); renderTabelaPerf(data.performance); }
-                if(data.filename){ var hh=document.getElementById('import-history'); if(hh) hh.innerHTML='<li style="font-size:13px;color:var(--text)"><strong>'+data.filename+'<\/strong><\/li>'; }
+                if(data.filename){
+                    var hh=document.getElementById('import-history');
+                    if(hh) hh.innerHTML='<li style="font-size:13px;color:var(--text)"><strong>'+data.filename+'<\/strong><\/li>';
+                }
             } else {
-                var perf={};
-                VENCIDOS_DATA.forEach(function(r){ var n=(r.resp||'').trim(); if(!n||n.length>20) return; if(!perf[n]) perf[n]={responsavel:n,total:0,cumpridos:0,criticos:0,taxa:0}; perf[n].total++; perf[n].criticos++; });
-                PROXIMOS7.forEach(function(r){ var n=(r.resp||'').trim(); if(!n||n.length>20) return; if(!perf[n]) perf[n]={responsavel:n,total:0,cumpridos:0,criticos:0,taxa:0}; perf[n].total++; });
-                var pl=Object.values(perf).sort(function(a,b){return b.criticos-a.criticos;}).slice(0,10);
-                renderChart(pl); renderTabelaPerf(pl);
+                ['total','vencidos','proximos','cumpridos'].forEach(function(k){
+                    var el=document.getElementById('kpi-'+k); if(el) el.textContent='—';
+                });
+                var tx2=document.getElementById('kpi-taxa-label');
+                if(tx2) tx2.textContent='importe a planilha';
             }
-            ['total','vencidos','proximos','cumpridos'].forEach(function(k){ var el=document.getElementById('kpi-'+k); if(el) el.textContent=kpis[k]; });
+            renderPagina('hoje'); renderPagina('critico'); renderPagina('vencido');
+            renderPrazosRecentes();
             var elHoje=document.getElementById('kpi-hoje'); if(elHoje) elHoje.textContent=HOJE_DATA.length||'0';
-            var tx=document.getElementById('kpi-taxa-label'); if(tx) tx.textContent=(kpis.taxa||41.7)+'% de taxa';
-            renderPagina('critico'); renderPagina('vencido'); renderPrazosRecentes();
             var nh=document.getElementById('nb-hoje'),nc=document.getElementById('nb-c'),nv=document.getElementById('nb-v');
             if(nh) nh.textContent=HOJE_DATA.length||'0';
             if(nc) nc.textContent=PROXIMOS7.length||'0';
