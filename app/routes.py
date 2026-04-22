@@ -15,7 +15,7 @@ def _sb_headers():
         'apikey': SUPABASE_KEY,
         'Authorization': f'Bearer {SUPABASE_KEY}',
         'Content-Type': 'application/json',
-        'Prefer': 'return=representation',
+        'Prefer': 'return=representation'
     }
 
 # --- HELPERS DO SUPABASE ---
@@ -24,46 +24,28 @@ def _sb_get(table, params=''):
     try:
         r = http.get(f'{SUPABASE_URL}/rest/v1/{table}?{params}', headers=_sb_headers(), timeout=10)
         return r.json() if r.ok else []
-    except Exception as e:
-        print(f'[SB GET] {table}: {e}')
-        return []
+    except: return []
 
 def _sb_post(table, data):
     try:
         r = http.post(f'{SUPABASE_URL}/rest/v1/{table}', headers=_sb_headers(), json=data, timeout=10)
         res = r.json()
         return res[0] if r.ok and isinstance(res, list) and res else res
-    except Exception as e:
-        print(f'[SB POST] {table}: {e}')
-        return {}
-
-def _sb_upsert_bulk(table, data_list):
-    try:
-        h = _sb_headers()
-        h['Prefer'] = 'resolution=merge-duplicates,return=minimal'
-        r = http.post(f'{SUPABASE_URL}/rest/v1/{table}', headers=h, json=data_list, timeout=15)
-        return r.ok
-    except Exception as e:
-        print(f'[SB UPSERT] {table}: {e}')
-        return False
+    except: return {}
 
 def _sb_patch(table, key, val, data):
     try:
         r = http.patch(f'{SUPABASE_URL}/rest/v1/{table}?{key}=eq.{val}', headers=_sb_headers(), json=data, timeout=10)
         return r.ok
-    except Exception as e:
-        print(f'[SB PATCH] {e}')
-        return False
+    except: return False
 
 def _sb_delete(table, key, val):
     try:
         r = http.delete(f'{SUPABASE_URL}/rest/v1/{table}?{key}=eq.{val}', headers=_sb_headers(), timeout=10)
         return r.ok
-    except Exception as e:
-        print(f'[SB DELETE] {e}')
-        return False
+    except: return False
 
-# --- GESTÃO DE CACHE (DADOS_CACHE) ---
+# --- GESTÃO DE CACHE ---
 
 def cache_get(chave):
     try:
@@ -81,10 +63,60 @@ def cache_set(chave, valor):
                   json={'chave': chave, 'valor': valor, 'atualizado': datetime.utcnow().isoformat()}, timeout=10)
     except: pass
 
-# --- LÓGICA DE PROCESSAMENTO ---
+# --- LÓGICA DE CÁLCULO DINÂMICO (CORRIGE AS DATAS) ---
 
-def _norm(nome):
-    return str(nome).strip().upper() if nome else 'SEM RESPONSAVEL'
+def _recalcular_prazos(lista_mestra):
+    """Recalcula status e dias restantes baseando-se na data de hoje."""
+    hoje = date.today()
+    vencidos, proximos, cumpridos_lista = [], [], []
+    perf = {}
+    manuais = cache_get('cumpridos_manuais') or []
+
+    for p in lista_mestra:
+        try:
+            dt_prazo = date.fromisoformat(p['data_iso'])
+        except: continue
+        
+        proc = p['processo']
+        resp = p['responsavel']
+        ja_cumprido = p.get('ja_cumprido', False) or proc in manuais
+        
+        if resp not in perf: perf[resp] = {'responsavel': resp, 'total': 0, 'cumpridos': 0, 'criticos': 0}
+        perf[resp]['total'] += 1
+
+        if ja_cumprido:
+            perf[resp]['cumpridos'] += 1
+            cumpridos_lista.append(p)
+            continue
+
+        diff = (dt_prazo - hoje).days
+        p['dias'] = abs(diff)
+        
+        if diff < 0:
+            perf[resp]['criticos'] += 1
+            vencidos.append(p)
+        elif diff <= 7:
+            proximos.append(p)
+
+    perf_list = []
+    for r in perf.values():
+        r['taxa'] = round(r['cumpridos']/r['total']*100, 1) if r['total'] > 0 else 0
+        perf_list.append(r)
+
+    return {
+        'stats': {
+            'total': len(lista_mestra),
+            'vencidos': len(vencidos),
+            'proximos': len(proximos),
+            'cumpridos': len(cumpridos_lista),
+            'taxa': round(len(cumpridos_lista)/len(lista_mestra)*100, 1) if lista_mestra else 0,
+            'ultima_atualizacao': hoje.strftime('%d/%m/%Y')
+        },
+        'performance': sorted(perf_list, key=lambda x: x['taxa'], reverse=True),
+        'proximos': sorted(proximos, key=lambda x: x['dias']),
+        'vencidos': sorted(vencidos, key=lambda x: x['dias'], reverse=True),
+        'cumpridos_lista': cumpridos_lista
+    }
 
 def _parse_xlsx(file_obj):
     import openpyxl, warnings
@@ -94,60 +126,29 @@ def _parse_xlsx(file_obj):
     
     ws = None
     for name in wb.sheetnames:
-        if "Prazos" in name:
+        if "Prazos" in name or "Pauta" in name:
             ws = wb[name]
             break
-    if not ws: raise ValueError("Aba de Prazos não encontrada.")
+    if not ws: ws = wb.active
 
-    today = date.today()
-    perf = {}
-    prox, venc, cumpridos_lista = [], [], []
-    total = cumpr = 0
-    
+    lista_completa = []
     for row in ws.iter_rows(min_row=2, values_only=True):
         if not row[1] or not row[4]: continue
-        
         prazo_raw = row[1]
-        resp = _norm(row[2])
-        proc = str(row[4]).strip()
-        parte = str(row[5]).strip()[:80] if row[5] else ''
-        vara = str(row[6]).strip() if row[6] else ''
-        cumpr_val = str(row[13]).strip().upper() if row[13] else ''
-        
         if isinstance(prazo_raw, datetime): prazo_d = prazo_raw.date()
         elif isinstance(prazo_raw, date): prazo_d = prazo_raw
         else: continue
         
-        total += 1
-        prazo_str = prazo_d.strftime('%d/%m/%Y')
-        ja_cumprido = cumpr_val in ('SIM','PARCIAL','PREJUDICADO')
-        
-        entry = {'processo': proc, 'parte': parte, 'responsavel': resp, 'prazo': prazo_str, 'vara': vara}
-        
-        if ja_cumprido:
-            cumpr += 1
-            cumpridos_lista.append(entry)
-        else:
-            diff = (prazo_d - today).days
-            entry['dias'] = abs(int(diff))
-            if diff < 0: venc.append(entry)
-            elif diff <= 7: prox.append(entry)
-            
-        if resp not in perf: perf[resp] = {'responsavel': resp, 'total': 0, 'cumpridos': 0, 'criticos': 0}
-        perf[resp]['total'] += 1
-        if ja_cumprido: perf[resp]['cumpridos'] += 1
-        elif (prazo_d - today).days < 0: perf[resp]['criticos'] += 1
-
-    perf_list = []
-    for r in perf.values():
-        r['taxa'] = round(r['cumpridos']/r['total']*100, 1) if r['total'] > 0 else 0
-        perf_list.append(r)
-
-    return {
-        'stats': {'total': total, 'vencidos': len(venc), 'proximos': len(prox), 'cumpridos': cumpr, 'taxa': round(cumpr/total*100, 1) if total > 0 else 0},
-        'performance': sorted(perf_list, key=lambda x: x['taxa'], reverse=True),
-        'proximos': prox, 'vencidos': venc, 'cumpridos_lista': cumpridos_lista
-    }
+        lista_completa.append({
+            'processo': str(row[4]).strip(),
+            'parte': str(row[5]).strip()[:80] if row[5] else '',
+            'responsavel': str(row[2]).strip().upper() if row[2] else 'SEM RESPONSAVEL',
+            'prazo': prazo_d.strftime('%d/%m/%Y'),
+            'data_iso': prazo_d.isoformat(),
+            'vara': str(row[6]).strip() if row[6] else '',
+            'ja_cumprido': str(row[13]).strip().upper() in ('SIM', 'PARCIAL', 'PREJUDICADO')
+        })
+    return lista_completa
 
 # --- AUTH ---
 
@@ -162,66 +163,35 @@ def token_required(f):
 
 # --- ROTAS ---
 
-@bp.route('/')
-def index():
-    from flask import redirect, url_for
-    return redirect(url_for('main.painel', token=current_app.config['ACCESS_TOKEN']))
-
-@bp.route('/painel')
-@token_required
-def painel():
-    return render_template('dashboard.html')
-
 @bp.route('/api/upload', methods=['POST'])
 @token_required
 def upload_file():
-    if 'file' not in request.files: return jsonify({'error':'Arquivo nao fornecido'}), 400
-    file = request.files['file']
+    file = request.files.get('file')
+    if not file: return jsonify({'error':'Arquivo nao fornecido'}), 400
     try:
-        data = _parse_xlsx(file)
-        cache_set('stats', data['stats'])
-        cache_set('performance', data['performance'])
-        cache_set('proximos', data['proximos'])
-        cache_set('vencidos', data['vencidos'])
-        cache_set('cumpridos_lista', data['cumpridos_lista'])
+        lista = _parse_xlsx(file)
+        cache_set('lista_mestra', lista)
+        res = _recalcular_prazos(lista)
+        cache_set('stats', res['stats'])
         cache_set('filename', file.filename)
-        
-        try:
-            bulk = []
-            for p in (data['vencidos'] + data['proximos'] + data['cumpridos_lista']):
-                dt = datetime.strptime(p['prazo'], '%d/%m/%Y').date()
-                bulk.append({
-                    'numero_processo': p['processo'], 'parte_ativa': p['parte'], 'responsavel': p['responsavel'],
-                    'data_prazo': dt.isoformat(), 'vara': p['vara'], 'status': 'cumprido' if p in data['cumpridos_lista'] else 'aberto'
-                })
-            _sb_upsert_bulk('prazos_processuais', bulk)
-        except: pass
-        return jsonify({'success': True, 'stats': data['stats'], 'filename': file.filename})
+        return jsonify({'success': True, 'stats': res['stats'], 'filename': file.filename})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @bp.route('/api/dashboard')
 @token_required
 def get_dashboard():
-    stats = cache_get('stats')
-    perf = cache_get('performance')
-    if not stats: return jsonify({'sem_dados':True})
-    return jsonify({'stats': stats, 'performance': perf or [], 'filename': cache_get('filename') or ''})
+    lista = cache_get('lista_mestra')
+    if not lista: return jsonify({'sem_dados': True})
+    return jsonify(_recalcular_prazos(lista))
 
 @bp.route('/api/criticos')
 @token_required
 def get_criticos():
-    vencidos = cache_get('vencidos') or []
-    proximos = cache_get('proximos') or []
-    if not vencidos and not proximos:
-        hoje = date.today().isoformat()
-        db_v = _sb_get('prazos_processuais', f'status=eq.aberto&data_prazo=lt.{hoje}')
-        db_p = _sb_get('prazos_processuais', f'status=eq.aberto&data_prazo=gte.{hoje}&data_prazo=lte.{(date.today()+timedelta(days=7)).isoformat()}')
-        def fmt(p):
-            dt = date.fromisoformat(p['data_prazo'])
-            return {'processo': p['numero_processo'], 'parte': p['parte_ativa'], 'responsavel': p['responsavel'], 'prazo': dt.strftime('%d/%m/%Y'), 'vara': p['vara'], 'dias': abs((dt - date.today()).days)}
-        vencidos, proximos = [fmt(v) for v in db_v], [fmt(p) for p in db_p]
-    return jsonify({'vencidos': vencidos, 'proximos': proximos})
+    lista = cache_get('lista_mestra')
+    if not lista: return jsonify({'sem_dados': True})
+    res = _recalcular_prazos(lista)
+    return jsonify({'vencidos': res['vencidos'], 'proximos': res['proximos']})
 
 @bp.route('/api/equipe', methods=['GET', 'POST'])
 @token_required
@@ -237,21 +207,24 @@ def gerenciar_equipe():
 @token_required
 def membro_ops(mid):
     if request.method == 'DELETE':
-        ok = _sb_delete('equipe', 'id', mid)
-        return jsonify({'success': ok})
-    data = request.get_json()
-    ok = _sb_patch('equipe', 'id', mid, data)
-    return jsonify({'success': ok})
+        return jsonify({'success': _sb_delete('equipe', 'id', mid)})
+    return jsonify({'success': _sb_patch('equipe', 'id', mid, request.get_json())})
 
 @bp.route('/api/cumprido', methods=['POST'])
 @token_required
 def marcar_cumprido():
-    data = request.get_json()
-    proc = data.get('processo')
+    proc = request.get_json().get('processo')
     if not proc: return jsonify({'error': 'Processo obrigatorio'}), 400
-    cache_v = cache_get('vencidos') or []
-    cache_p = cache_get('proximos') or []
-    cache_set('vencidos', [x for x in cache_v if (x.get('processo') or x.get('proc')) != proc])
-    cache_set('proximos', [x for x in cache_p if (x.get('processo') or x.get('proc')) != proc])
-    ok = _sb_patch('prazos_processuais', 'numero_processo', proc, {'status': 'cumprido'})
-    return jsonify({'success': ok})
+    manuais = cache_get('cumpridos_manuais') or []
+    if proc not in manuais: manuais.append(proc)
+    cache_set('cumpridos_manuais', manuais)
+    return jsonify({'success': True})
+
+@bp.route('/painel')
+@token_required
+def painel(): return render_template('dashboard.html')
+
+@bp.route('/')
+def index():
+    from flask import redirect, url_for
+    return redirect(url_for('main.painel', token=current_app.config['ACCESS_TOKEN']))
