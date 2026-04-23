@@ -404,6 +404,16 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     </span>
     <button class="btn btn-amber" onclick="alertarTodosProximos()">Alertar Todos</button>
   </div>
+  <div class="fb">
+    <div class="sw"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="filtro-proximos" type="text" placeholder="Buscar processo, responsavel ou parte..."></div>
+    <select id="resp-proximos" class="fsel"><option value="">Todos responsaveis</option></select>
+    <div style="display:flex;align-items:center;gap:6px">
+      <label style="font-size:12px;color:var(--text2);white-space:nowrap">Prazo:</label>
+      <input id="data-proximos" type="date" class="fsel" style="padding:7px 10px;cursor:pointer">
+      <button onclick="document.getElementById('data-proximos').value='';filtroState.proximos.data='';pagState.critico=1;renderPagina('critico')" style="padding:6px 8px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-size:11px">✕</button>
+    </div>
+    <button onclick="exportarXlsx('critico')" class="xbtn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Excel</button>
+  </div>
   <div class="sel-bar">
     <input type="checkbox" class="cb-sel" id="chk-all-critico" onchange="selecionarTodos('critico',this.checked)" title="Selecionar todos">
     <span class="sel-count">Selecionados: <strong id="sel-count-critico">0</strong></span>
@@ -492,7 +502,7 @@ var _selecoes    = { hoje:{}, critico:{} };
 var _contatosCache = null;
 var POR_PAG = 25;
 var pagState    = { hoje:1, critico:1, vencido:1 };
-var filtroState = { hoje:{texto:'',resp:'',vara:''}, critico:{texto:'',resp:'',vara:'',data:''}, vencido:{texto:'',resp:'',vara:''} };
+var filtroState = { hoje:{texto:'',resp:'',vara:''}, critico:{texto:'',resp:'',vara:'',data:''}, proximos:{texto:'',resp:'',data:''}, vencido:{texto:'',resp:'',vara:''} };
 var _chartInstance = null;
 var _isDark = true;
 
@@ -641,22 +651,22 @@ function renderCriticos(data){
     }
     renderPagina('hoje'); renderPagina('critico'); renderPagina('vencido');
     atualizarBadges();
-    // Popular select responsaveis
-    var selRC=document.getElementById('resp-critico');
-    if(selRC){
+    // Popular selects de responsaveis
+    ['resp-proximos','resp-critico'].forEach(function(selId){
+        var sel=document.getElementById(selId); if(!sel) return;
         var resps={};
-        PROXIMOS7.concat(VENCIDOS_DATA).forEach(function(r){ if(r.resp) resps[r.resp]=1; });
-        var cur=selRC.value;
-        var opts=Array.from(selRC.options).map(function(o){return o.value;});
+        PROXIMOS7.forEach(function(r){ if(r.resp) resps[r.resp]=1; });
+        var cur=sel.value;
+        var opts=Array.from(sel.options).map(function(o){return o.value;});
         Object.keys(resps).sort().forEach(function(resp){
             if(opts.indexOf(resp)<0){
                 var opt=document.createElement('option');
                 opt.value=resp; opt.textContent=resp;
-                selRC.appendChild(opt);
+                sel.appendChild(opt);
             }
         });
-        if(cur) selRC.value=cur;
-    }
+        if(cur) sel.value=cur;
+    });
 }
 
 // ── TABELA PERFORMANCE ────────────────────────────────────────────────────────
@@ -744,7 +754,7 @@ function renderPagina(tipo){
     var isHoje=tipo==='hoje';
     var ic=tipo==='critico';
     var dados=isHoje?HOJE_DATA:(ic?PROXIMOS7:VENCIDOS_DATA);
-    var f=filtroState[tipo];
+    var f=ic?filtroState.proximos:filtroState[tipo];
     var fl=filtrarDados(dados,f);
     var tp=Math.max(1,Math.ceil(fl.length/POR_PAG));
     if(pagState[tipo]>tp) pagState[tipo]=tp;
@@ -1140,10 +1150,18 @@ function equipe_cancelarEdicao(){
 function initFiltros(){
     var dataCritico=document.getElementById('data-critico');
     if(dataCritico) dataCritico.addEventListener('change',function(){ filtroState.critico.data=this.value; pagState.critico=1; renderPagina('critico'); });
-    [['filtro-hoje','resp-hoje','hoje'],['filtro-critico','resp-critico','critico'],['filtro-vencido','resp-critico','vencido']].forEach(function(g){
+    var dataProximos=document.getElementById('data-proximos');
+    if(dataProximos) dataProximos.addEventListener('change',function(){ filtroState.proximos.data=this.value; pagState.critico=1; renderPagina('critico'); });
+    [['filtro-hoje','resp-hoje','hoje'],['filtro-critico','resp-critico','critico'],['filtro-proximos','resp-proximos','proximos'],['filtro-vencido','resp-critico','vencido']].forEach(function(g){
         var ft=document.getElementById(g[0]),rs=document.getElementById(g[1]),t=g[2];
-        if(ft) ft.addEventListener('input',function(){ filtroState[t].texto=this.value; pagState[t]=1; renderPagina(t); });
-        if(rs) rs.addEventListener('change',function(){ filtroState[t].resp=this.value; pagState[t]=1; renderPagina(t); });
+        if(ft) ft.addEventListener('input',function(){
+            if(t==='proximos'){ filtroState.proximos.texto=this.value; pagState.critico=1; renderPagina('critico'); }
+            else { filtroState[t].texto=this.value; pagState[t]=1; renderPagina(t); }
+        });
+        if(rs) rs.addEventListener('change',function(){
+            if(t==='proximos'){ filtroState.proximos.resp=this.value; pagState.critico=1; renderPagina('critico'); }
+            else { filtroState[t].resp=this.value; pagState[t]=1; renderPagina(t); }
+        });
     });
 }
 
