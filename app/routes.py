@@ -182,7 +182,12 @@ def token_required(f):
 @bp.route('/')
 def index():
     from flask import redirect, url_for
-    return redirect(url_for('main.painel', token=current_app.config['ACCESS_TOKEN']))
+    try:
+        token = current_app.config.get('ACCESS_TOKEN', 'pgm-contenciosa-2026')
+        return redirect(url_for('main.painel', token=token))
+    except Exception as e:
+        print(f'[ERROR index] {e}')
+        return redirect('/painel?token=pgm-contenciosa-2026')
 
 @bp.route('/painel')
 @token_required
