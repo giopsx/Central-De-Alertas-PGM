@@ -171,6 +171,7 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = (request.args.get('token') or
+                 request.cookies.get('token') or
                  request.headers.get('Authorization','').replace('Bearer ',''))
         if not token or token != current_app.config['ACCESS_TOKEN']:
             return jsonify({'error':'Token invalido'}), 401
@@ -186,7 +187,12 @@ def index():
 @bp.route('/painel')
 @token_required
 def painel():
-    return render_template('dashboard.html')
+    from flask import make_response
+    resp = make_response(render_template('dashboard.html'))
+    token = request.args.get('token') or request.cookies.get('token')
+    if token:
+        resp.set_cookie('token', token, max_age=86400*30)  # 30 dias
+    return resp
 
 @bp.route('/api/upload', methods=['POST'])
 @token_required
