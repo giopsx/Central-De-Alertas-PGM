@@ -289,28 +289,28 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
       <div class="kc-glow"></div>
       <div class="kc-top"><span class="kc-lbl">Total</span><div class="kc-ico"><svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg></div></div>
       <div class="kc-val" id="kpi-total">—</div>
-      <div class="kc-sub">processos com prazo</div>
+      <div class="kc-sub" style="color:var(--accent2);font-weight:600">Processos com prazo</div>
       <div class="kc-bar"></div>
     </div>
     <div class="kc red">
       <div class="kc-glow"></div>
       <div class="kc-top"><span class="kc-lbl">Vencidos</span><div class="kc-ico"><svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div></div>
       <div class="kc-val" id="kpi-vencidos">—</div>
-      <div class="kc-sub">nao cumpridos</div>
+      <div class="kc-sub" style="color:var(--red);font-weight:600">Não cumpridos</div>
       <div class="kc-bar"></div>
     </div>
     <div class="kc red" style="cursor:pointer" onclick="switchTabByName('hoje')">
       <div class="kc-glow"></div>
       <div class="kc-top"><span class="kc-lbl">Vence Hoje</span><div class="kc-ico"><svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div></div>
       <div class="kc-val" id="kpi-hoje">0</div>
-      <div class="kc-sub">vence hoje</div>
+      <div class="kc-sub" style="color:var(--red);font-weight:600">Vence hoje</div>
       <div class="kc-bar"></div>
     </div>
     <div class="kc amber" style="cursor:pointer" onclick="switchTabByName('criticos')">
       <div class="kc-glow"></div>
       <div class="kc-top"><span class="kc-lbl">Proximos 7 dias</span><div class="kc-ico"><svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div></div>
       <div class="kc-val" id="kpi-proximos">0</div>
-      <div class="kc-sub">atencao urgente</div>
+      <div class="kc-sub" style="color:var(--amber);font-weight:600">Atenção urgente</div>
       <div class="kc-bar"></div>
     </div>
     <div class="kc green">
@@ -578,6 +578,7 @@ async function loadDashboard(){
             try{ localStorage.setItem('pgm_dash_cache',JSON.stringify(dashData)); }catch(e){}
         }
         if(critData) renderCriticos(critData);
+        popularSelectsResponsaveis();
     } catch(e){ console.warn('API indisponivel:',e.message); }
     if(!apiOk){
         try{
@@ -595,7 +596,7 @@ function renderDashboard(data){
             var el=document.getElementById('kpi-'+k); if(el) el.textContent=kpis[k]||0;
         });
         var tx=document.getElementById('kpi-taxa-label');
-        if(tx) tx.textContent=(kpis.taxa||0)+'% de taxa';
+        if(tx){ tx.textContent=(kpis.taxa||0)+'% de taxa'; tx.style.color='var(--green)'; tx.style.fontWeight='600'; }
         if(data.performance){ renderChart(data.performance); renderTabelaPerf(data.performance); popularSelectRelatorio(data.performance); }
         if(data.filename){
             var hh=document.getElementById('import-history');
@@ -606,7 +607,7 @@ function renderDashboard(data){
             var el=document.getElementById('kpi-'+k); if(el) el.textContent='—';
         });
         var tx2=document.getElementById('kpi-taxa-label');
-        if(tx2) tx2.textContent='importe a planilha';
+        if(tx2) tx2.textContent='Importe a planilha';
     }
     renderPagina('hoje'); renderPagina('critico'); renderPagina('vencido');
     renderPrazosRecentes();
@@ -651,22 +652,8 @@ function renderCriticos(data){
     }
     renderPagina('hoje'); renderPagina('critico'); renderPagina('vencido');
     atualizarBadges();
-    // Popular selects de responsaveis
-    ['resp-proximos','resp-critico'].forEach(function(selId){
-        var sel=document.getElementById(selId); if(!sel) return;
-        var resps={};
-        PROXIMOS7.forEach(function(r){ if(r.resp) resps[r.resp]=1; });
-        var cur=sel.value;
-        var opts=Array.from(sel.options).map(function(o){return o.value;});
-        Object.keys(resps).sort().forEach(function(resp){
-            if(opts.indexOf(resp)<0){
-                var opt=document.createElement('option');
-                opt.value=resp; opt.textContent=resp;
-                sel.appendChild(opt);
-            }
-        });
-        if(cur) sel.value=cur;
-    });
+    // Popular selects de responsaveis com membros ativos da equipe
+    popularSelectsResponsaveis();
 }
 
 // ── TABELA PERFORMANCE ────────────────────────────────────────────────────────
@@ -730,6 +717,44 @@ function renderPrazosRecentes(){
         var lbl=d===0?'Hoje':d===1?'Amanha':d+' dias';
         return '<div class="pc '+cls+'"><div class="pcdot"></div><div style="flex:1;min-width:0"><div class="pcproc">'+(r.proc||r.processo||'')+'</div><div class="pcinfo">'+(r.resp||r.responsavel||'')+'</div></div><span class="badge '+bc+'">'+lbl+'</span></div>';
     }).join('');
+}
+
+// ── POPULAR SELECTS DE RESPONSAVEIS ──────────────────────────────────────────
+async function popularSelectsResponsaveis(){
+    // Buscar membros ativos da equipe
+    var membrosAtivos=[];
+    try{
+        var res=await fetch('/api/equipe?token='+getToken());
+        if(res.ok){
+            var json=await res.json();
+            membrosAtivos=(json.membros||[])
+                .filter(function(m){ return m.ativo!==false && m.nome; })
+                .map(function(m){ return m.nome.trim(); })
+                .sort();
+        }
+    } catch(e){}
+    // Fallback: localStorage
+    if(!membrosAtivos.length){
+        try{
+            var local=JSON.parse(localStorage.getItem('pgm_equipe_v1')||'[]');
+            membrosAtivos=local
+                .filter(function(m){ return m.ativo!==false && m.nome; })
+                .map(function(m){ return m.nome.trim(); })
+                .sort();
+        } catch(e){}
+    }
+    // Popular todos os selects de responsavel
+    ['resp-hoje','resp-proximos','resp-critico'].forEach(function(selId){
+        var sel=document.getElementById(selId); if(!sel) return;
+        var cur=sel.value;
+        sel.innerHTML='<option value="">Todos responsaveis</option>';
+        membrosAtivos.forEach(function(nome){
+            var opt=document.createElement('option');
+            opt.value=nome; opt.textContent=nome;
+            sel.appendChild(opt);
+        });
+        if(cur) sel.value=cur;
+    });
 }
 
 // ── PAGINACAO E FILTRO ────────────────────────────────────────────────────────
@@ -1134,6 +1159,7 @@ async function equipe_salvar(){
     } catch(e){ console.error('Erro localStorage:',e); }
     equipe_cancelarEdicao();
     await equipe_renderizar();
+    popularSelectsResponsaveis();
     alert('Membro salvo!'+(savedViaAPI?'':'\n(Salvo localmente — API indisponivel)'));
 }
 
