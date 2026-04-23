@@ -189,15 +189,15 @@ def index():
         print(f'[ERROR index] {e}')
         return redirect('/painel?token=pgm-contenciosa-2026')
 
+@bp.route('/favicon.ico')
+def favicon():
+    from flask import send_from_directory
+    import os
+    return send_from_directory(os.path.join(current_app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 @bp.route('/painel')
-@token_required
 def painel():
-    from flask import make_response
-    resp = make_response(render_template('dashboard.html'))
-    token = request.args.get('token') or request.cookies.get('token')
-    if token:
-        resp.set_cookie('token', token, max_age=86400*30)  # 30 dias
-    return resp
+    return render_template('dashboard.html')
 
 @bp.route('/api/upload', methods=['POST'])
 @token_required
