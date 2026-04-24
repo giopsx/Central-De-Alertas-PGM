@@ -79,7 +79,7 @@ def cache_set(chave, valor):
 
 # Parse xlsx
 _NAO_PESSOAS = {
-    'SPF','SPJ','SPMA','GEC','AMBIENTAL','FISCAL','COMCEP','VERIFICAR','-',
+    'SPF','SPJ','SPMA','GEC','AMBIENTAL','FISCAL','VERIFICAR','-',
     'SEM RESPONSAVEL','GABINETE ACOMPANHANDO','CARTORIO/GABINETE','DISTRIBUIR',
     'MANIFESTACAO DESNECESSARIA','PREJUDICADO','',
 }
@@ -116,7 +116,8 @@ def _parse_xlsx(file_obj, inativos=None):
         if row[0] is None and row[1] is None and row[2] is None: continue
 
         prazo_raw = row[1]
-        resp  = _norm(str(row[2]).strip() if row[2] else '')
+        resp_raw = row[2]
+        resp = _norm(''.join(c for c in str(resp_raw).strip() if c.isprintable()).strip() if resp_raw is not None else '')
         if not resp: resp = 'Sem responsavel'
         proc  = str(row[4]).strip() if row[4] else ''
         parte = str(row[5]).strip()[:60] if row[5] else ''
