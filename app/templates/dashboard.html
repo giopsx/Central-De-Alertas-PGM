@@ -1278,7 +1278,7 @@ function toggleDark(){
     }
     localStorage.setItem('pgm-dark',_isDark?'1':'0');
 }
-if(localStorage.getItem('pgm-dark')==='1'){ _isDark=false; toggleDark(); } else if(localStorage.getItem('pgm-dark')===null){ toggleDark(); }
+if(localStorage.getItem('pgm-dark')==='1'){ _isDark=false; toggleDark(); }
 
 // ── PDF ───────────────────────────────────────────────────────────────────────
 async function generateReport(type){
