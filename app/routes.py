@@ -71,9 +71,13 @@ def cache_set(chave, valor):
     try:
         h = _sb_headers()
         h['Prefer'] = 'resolution=merge-duplicates,return=minimal'
-        http.post(f'{SUPABASE_URL}/rest/v1/dados_cache', headers=h,
+        r = http.post(f'{SUPABASE_URL}/rest/v1/dados_cache', headers=h,
                   json={'chave': chave, 'valor': valor,
                         'atualizado': datetime.utcnow().isoformat()}, timeout=10)
+        if not r.ok:
+            print(f'[CACHE SET ERROR] {chave}: {r.status_code} {r.text[:200]}')
+        else:
+            print(f'[CACHE SET OK] {chave}')
     except Exception as e:
         print(f'[CACHE SET] {chave}: {e}')
 
