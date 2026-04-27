@@ -1079,7 +1079,7 @@ function exportarXlsx(tipo){
     var isHoje=tipo==='hoje',ic=tipo==='critico';
     var dados=isHoje?HOJE_DATA:(ic?PROXIMOS7:VENCIDOS_DATA);
     var fl=filtrarDados(dados,filtroState[tipo]);
-    var cab=['Processo','Parte Ativa','Responsavel','Prazo',ic?'Vence em':'Dias Vencido','Vara'];
+    var cab=['Processo','Parte Ativa','Responsável','Prazo',ic?'Vence em':'Dias Vencido','Vara'];
     var linhas=fl.map(function(r){
         var dias=r.dias||0;
         var dLabel=ic?(dias===0?'Hoje':dias===1?'Amanha':dias+' dias'):dias+'d';
@@ -1309,7 +1309,7 @@ async function generateReport(type){
                 pdf.text('Pag. '+i+'/'+n,pageW-margin,pageH-5,{align:'right'});
             }
         }
-        var tituloRel=type==='semanal'?'Relatorio Semanal':type==='mensal'?'Relatorio Mensal':type==='individual'?'Relatorio Individual':'Relatorio de Criticos';
+        var tituloRel=type==='semanal'?'Relatório Semanal':type==='mensal'?'Relatório Mensal':type==='individual'?'Relatório Individual':'Relatório de Críticos';
         var y=cabecalho(tituloRel);
         var statsKpis={
             total:document.getElementById('kpi-total')?.textContent||'0',
@@ -1320,13 +1320,13 @@ async function generateReport(type){
         };
         if(type==='semanal'||type==='mensal'){
             pdf.autoTable({startY:y,head:[['Indicador','Valor']],
-                body:[['Total',statsKpis.total],['Vencidos',statsKpis.vencidos],['Proximos 7 dias',statsKpis.proximos],['Cumpridos',statsKpis.cumpridos],['Taxa',statsKpis.taxa]],
+                body:[['Total',statsKpis.total],['Vencidos',statsKpis.vencidos],['Próximos 7 dias',statsKpis.proximos],['Cumpridos',statsKpis.cumpridos],['Taxa',statsKpis.taxa]],
                 theme:'striped',headStyles:{fillColor:[8,12,20],textColor:255,fontStyle:'bold',fontSize:9},bodyStyles:{fontSize:9},margin:{left:margin,right:margin}});
             y=pdf.lastAutoTable.finalY+8;
             if(PROXIMOS7.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(180,100,0);
-                pdf.text('Vencendo nos Proximos 7 Dias ('+PROXIMOS7.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsavel','Prazo','Vence em']],
+                pdf.text('Vencendo nos Próximos 7 Dias ('+PROXIMOS7.length+')',margin,y);y+=4;
+                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsável','Prazo','Vence em']],
                     body:PROXIMOS7.map(function(r){var d=r.dias||0;return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',d===0?'Hoje':d+'d'];}),
                     theme:'striped',headStyles:{fillColor:[180,100,0],textColor:255,fontStyle:'bold',fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
             }
@@ -1334,7 +1334,7 @@ async function generateReport(type){
                 y=pdf.lastAutoTable.finalY+8;
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(200,30,30);
                 pdf.text('Vencidos ('+VENCIDOS_DATA.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsavel','Prazo','Dias']],
+                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsável','Prazo','Dias']],
                     body:VENCIDOS_DATA.map(function(r){return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',r.dias+'d'];}),
                     theme:'striped',headStyles:{fillColor:[200,30,30],textColor:255,fontStyle:'bold',fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
             }
@@ -1356,7 +1356,7 @@ async function generateReport(type){
             var meusP=PROXIMOS7.filter(function(r){return (r.resp||'').toUpperCase()===resp.toUpperCase();});
             statusEl.textContent='Gerando PDF...';
             pdf.setFontSize(14);pdf.setFont('helvetica','bold');pdf.setTextColor(20,30,60);
-            pdf.text('Responsavel: '+resp,margin,y);y+=14;
+            pdf.text('Responsável: '+resp,margin,y);y+=14;
             var taxaC=perfDados.taxa>=60?[5,122,85]:perfDados.taxa>=40?[194,120,3]:[224,36,36];
             var cardW=(pageW-margin*2-9)/4;
             [{label:'TOTAL',val:String(perfDados.total||0),color:[26,86,219]},{label:'CUMPRIDOS',val:String(perfDados.cumpridos||meusCumpridos.length||0),color:[5,122,85]},{label:'TAXA',val:(perfDados.taxa||0).toFixed(1)+'%',color:taxaC},{label:'CRITICOS',val:String(perfDados.criticos||meusV.length||0),color:[224,36,36]}].forEach(function(card,ci){
@@ -1377,7 +1377,7 @@ async function generateReport(type){
             }
             if(meusP.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(180,100,0);
-                pdf.text('Proximos 7 Dias ('+meusP.length+')',margin,y);y+=4;
+                pdf.text('Próximos 7 Dias ('+meusP.length+')',margin,y);y+=4;
                 pdf.autoTable({startY:y,head:[['Processo','Parte','Prazo','Vence em']],body:meusP.map(function(r){return [r.proc||'',r.parte||'',r.prazo||'',r.dias+'d'];}),theme:'striped',headStyles:{fillColor:[180,100,0],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
                 y=pdf.lastAutoTable.finalY+8;
             }
@@ -1388,19 +1388,19 @@ async function generateReport(type){
             }
             if(!meusCumpridos.length&&!meusP.length&&!meusV.length){
                 pdf.setFontSize(11);pdf.setTextColor(100,116,139);
-                pdf.text('Nenhum processo encontrado para este responsavel.',margin,y);
+                pdf.text('Nenhum processo encontrado para este responsável.',margin,y);
             }
         } else if(type==='criticos'){
             if(PROXIMOS7.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(180,100,0);
-                pdf.text('Proximos 7 Dias ('+PROXIMOS7.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsavel','Prazo','Vence em']],body:PROXIMOS7.map(function(r){var d=r.dias||0;return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',d===0?'Hoje':d+'d'];}),theme:'striped',headStyles:{fillColor:[180,100,0],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
+                pdf.text('Próximos 7 Dias ('+PROXIMOS7.length+')',margin,y);y+=4;
+                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsável','Prazo','Vence em']],body:PROXIMOS7.map(function(r){var d=r.dias||0;return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',d===0?'Hoje':d+'d'];}),theme:'striped',headStyles:{fillColor:[180,100,0],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
                 y=pdf.lastAutoTable.finalY+8;
             }
             if(VENCIDOS_DATA.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(200,30,30);
                 pdf.text('Vencidos ('+VENCIDOS_DATA.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsavel','Prazo','Dias']],body:VENCIDOS_DATA.map(function(r){return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',r.dias+'d'];}),theme:'striped',headStyles:{fillColor:[200,30,30],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
+                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsável','Prazo','Dias']],body:VENCIDOS_DATA.map(function(r){return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',r.dias+'d'];}),theme:'striped',headStyles:{fillColor:[200,30,30],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
             }
         }
         rodape();
