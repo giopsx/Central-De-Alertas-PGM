@@ -962,12 +962,7 @@ async function alertarHoje(){
         var grupo=grupos[idx++];
         var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
         if(num){
-            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*
-   Parte: '+(d.parte||'—')+'
-   Vara: '+(d.vara||'—')+'
-   Prazo: '+d.prazo; }).join('
-
-');
+            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'\u2014')+'\n   Vara: '+(d.vara||'\u2014')+'\n   Prazo: '+d.prazo; }).join('\n\n');
             var msg='\uD83D\uDFE0 *ALERTA DE PRAZO*
 Subprocuradoria Contenciosa - PGM Porto Velho
 
@@ -1001,12 +996,7 @@ async function alertarTodosProximos(){
         var grupo=grupos[idx++];
         var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
         if(num){
-            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*
-   Parte: '+(d.parte||'—')+'
-   Vara: '+(d.vara||'—')+'
-   Prazo: '+d.prazo+(d.dias===0?'':' ('+d.dias+'d)'); }).join('
-
-');
+            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'\u2014')+'\n   Vara: '+(d.vara||'\u2014')+'\n   Prazo: '+d.prazo+(d.dias===0?'':' ('+d.dias+'d)'); }).join('\n\n');
             var msg='\uD83D\uDFE0 *ALERTA DE PRAZO*
 Subprocuradoria Contenciosa - PGM Porto Velho
 
@@ -1040,12 +1030,7 @@ async function alertarTodosVencidos(){
         var grupo=grupos[idx++];
         var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
         if(num){
-            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*
-   Parte: '+(d.parte||'—')+'
-   Vara: '+(d.vara||'—')+'
-   Prazo: '+d.prazo+' *(VENCIDO)*'; }).join('
-
-');
+            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'\u2014')+'\n   Vara: '+(d.vara||'\u2014')+'\n   Prazo: '+d.prazo+' *(VENCIDO)*'; }).join('\n\n');
             var msg='\uD83D\uDD34 *ALERTA DE PRAZO*
 Subprocuradoria Contenciosa - PGM Porto Velho
 
