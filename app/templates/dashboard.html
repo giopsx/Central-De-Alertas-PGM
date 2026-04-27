@@ -950,29 +950,75 @@ async function alertarHoje(){
     if(!filtrado.length){ alert('Nenhum processo vencendo hoje.'); return; }
     if(!confirm('Abrir WhatsApp para os '+filtrado.length+' processos que vencem HOJE?')) return;
     var contatos=await carregarContatos();
-    var semNumero=[],idx=0;
+    var porResp={};
+    filtrado.forEach(function(r){
+        var resp=(r.resp||'').toUpperCase();
+        if(!porResp[resp]) porResp[resp]={resp:r.resp,processos:[]};
+        porResp[resp].processos.push(r);
+    });
+    var grupos=Object.values(porResp),semNumero=[],idx=0;
     function prox(){
-        if(idx>=filtrado.length){ if(semNumero.length) alert('Sem numero: '+semNumero.join(', ')); return; }
-        var r=filtrado[idx++];
-        var num=r.resp?contatos[r.resp.toUpperCase()]:null;
-        if(num){ abrirWhatsApp(num,montarMensagem(r.proc||'',r.resp||'',r.prazo||'','proximo')); setTimeout(prox,2000); }
-        else{ if(r.resp&&semNumero.indexOf(r.resp)<0) semNumero.push(r.resp); prox(); }
+        if(idx>=grupos.length){ if(semNumero.length) alert('Sem numero: '+semNumero.join(', ')); return; }
+        var grupo=grupos[idx++];
+        var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
+        if(num){
+            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*
+   Parte: '+(d.parte||'—')+'
+   Vara: '+(d.vara||'—')+'
+   Prazo: '+d.prazo; }).join('
+
+');
+            var msg='🟠 *ALERTA DE PRAZO*
+Subprocuradoria Contenciosa - PGM Porto Velho
+
+Olá, '+grupo.resp+'!
+
+Você tem *'+grupo.processos.length+' processo(s)* com prazo HOJE:
+
+'+linhas+'
+
+_Esta é uma mensagem automática._';
+            abrirWhatsApp(num,msg); setTimeout(prox,2000);
+        } else { if(grupo.resp&&semNumero.indexOf(grupo.resp)<0) semNumero.push(grupo.resp); prox(); }
     }
     prox();
 }
 
 async function alertarTodosProximos(){
-    var filtrado=filtrarDados(PROXIMOS7,filtroState.critico);
+    var filtrado=filtrarDados(PROXIMOS7,filtroState.proximos);
     if(!filtrado.length){ alert('Nenhum processo encontrado.'); return; }
     if(!confirm('Abrir WhatsApp para os '+filtrado.length+' processos criticos?')) return;
     var contatos=await carregarContatos();
-    var semNumero=[],idx=0;
+    var porResp={};
+    filtrado.forEach(function(r){
+        var resp=(r.resp||'').toUpperCase();
+        if(!porResp[resp]) porResp[resp]={resp:r.resp,processos:[]};
+        porResp[resp].processos.push(r);
+    });
+    var grupos=Object.values(porResp),semNumero=[],idx=0;
     function prox(){
-        if(idx>=filtrado.length){ if(semNumero.length) alert('Sem numero: '+semNumero.join(', ')); return; }
-        var r=filtrado[idx++];
-        var num=r.resp?contatos[r.resp.toUpperCase()]:null;
-        if(num){ abrirWhatsApp(num,montarMensagem(r.proc||'',r.resp||'',r.prazo||'','proximo')); setTimeout(prox,2000); }
-        else{ if(r.resp&&semNumero.indexOf(r.resp)<0) semNumero.push(r.resp); prox(); }
+        if(idx>=grupos.length){ if(semNumero.length) alert('Sem numero: '+semNumero.join(', ')); return; }
+        var grupo=grupos[idx++];
+        var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
+        if(num){
+            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*
+   Parte: '+(d.parte||'—')+'
+   Vara: '+(d.vara||'—')+'
+   Prazo: '+d.prazo+(d.dias===0?'':' ('+d.dias+'d)'); }).join('
+
+');
+            var msg='🟠 *ALERTA DE PRAZO*
+Subprocuradoria Contenciosa - PGM Porto Velho
+
+Olá, '+grupo.resp+'!
+
+Você tem *'+grupo.processos.length+' processo(s)* com prazo A VENCER:
+
+'+linhas+'
+
+_Esta é uma mensagem automática._';
+            abrirWhatsApp(num,msg); setTimeout(prox,2000);
+        } else { if(grupo.resp&&semNumero.indexOf(grupo.resp)<0) semNumero.push(grupo.resp); prox(); }
     }
     prox();
 }
@@ -982,13 +1028,36 @@ async function alertarTodosVencidos(){
     if(!filtrado.length){ alert('Nenhum processo encontrado.'); return; }
     if(!confirm('Abrir WhatsApp para os '+filtrado.length+' processos vencidos?')) return;
     var contatos=await carregarContatos();
-    var semNumero=[],idx=0;
+    var porResp={};
+    filtrado.forEach(function(r){
+        var resp=(r.resp||'').toUpperCase();
+        if(!porResp[resp]) porResp[resp]={resp:r.resp,processos:[]};
+        porResp[resp].processos.push(r);
+    });
+    var grupos=Object.values(porResp),semNumero=[],idx=0;
     function prox(){
-        if(idx>=filtrado.length){ if(semNumero.length) alert('Sem numero: '+semNumero.join(', ')); return; }
-        var r=filtrado[idx++];
-        var num=r.resp?contatos[r.resp.toUpperCase()]:null;
-        if(num){ abrirWhatsApp(num,montarMensagem(r.proc||'',r.resp||'',r.prazo||'','vencido')); setTimeout(prox,2000); }
-        else{ if(r.resp&&semNumero.indexOf(r.resp)<0) semNumero.push(r.resp); prox(); }
+        if(idx>=grupos.length){ if(semNumero.length) alert('Sem numero: '+semNumero.join(', ')); return; }
+        var grupo=grupos[idx++];
+        var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
+        if(num){
+            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*
+   Parte: '+(d.parte||'—')+'
+   Vara: '+(d.vara||'—')+'
+   Prazo: '+d.prazo+' *(VENCIDO)*'; }).join('
+
+');
+            var msg='🔴 *ALERTA DE PRAZO*
+Subprocuradoria Contenciosa - PGM Porto Velho
+
+Olá, '+grupo.resp+'!
+
+Você tem *'+grupo.processos.length+' processo(s)* com prazo VENCIDO:
+
+'+linhas+'
+
+_Esta é uma mensagem automática._';
+            abrirWhatsApp(num,msg); setTimeout(prox,2000);
+        } else { if(grupo.resp&&semNumero.indexOf(grupo.resp)<0) semNumero.push(grupo.resp); prox(); }
     }
     prox();
 }
