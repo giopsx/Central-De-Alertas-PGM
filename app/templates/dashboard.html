@@ -804,12 +804,14 @@ function renderPagina(tipo){
             var procE=proc.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
             var respE=resp.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
             var prazoE=prazo.replace(/'/g,'&#39;');
+            var parteE=parte.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
+            var varaE=vara.replace(/'/g,'&#39;').replace(/"/g,'&quot;');
             var tipoS=isHoje?'proximo':ic?'proximo':'vencido';
             var dl=isHoje?'Hoje':ic?(dias===0?'Hoje':dias===1?'Amanha':dias+' dias'):dias+'d';
             var bc=(isHoje||(ic&&dias===0))?'br':ic?'ba':'br';
             var selTipo=isHoje?'hoje':'critico';
             var chkTd=(isHoje||ic)?
-                '<td><input type="checkbox" class="chk-row" data-tipo="'+selTipo+'" data-proc="'+procE+'" data-resp="'+respE+'" data-prazo="'+prazoE+'" data-ttype="'+tipoS+'" style="cursor:pointer;width:15px;height:15px" '+(_selecoes[selTipo]&&_selecoes[selTipo][proc]?'checked':'')+' onchange="toggleSel(this)"></td>'
+                '<td><input type="checkbox" class="chk-row" data-tipo="'+selTipo+'" data-proc="'+procE+'" data-resp="'+respE+'" data-prazo="'+prazoE+'" data-ttype="'+tipoS+'" data-parte="'+parteE+'" data-vara="'+varaE+'" style="cursor:pointer;width:15px;height:15px" '+(_selecoes[selTipo]&&_selecoes[selTipo][proc]?'checked':'')+' onchange="toggleSel(this)"></td>'
                 :'<td></td>';
             var acoesTd='<td><div style="display:flex;gap:4px;align-items:center">'+
                 '<button class="btn-icon btn-wpp" data-proc="'+procE+'" data-resp="'+respE+'" data-prazo="'+prazoE+'" data-tipo="'+tipoS+'" title="Enviar WhatsApp">&#128241;</button>'+
@@ -844,7 +846,7 @@ function mudarPag(tipo,p){
 function toggleSel(chk){
     var tipo=chk.getAttribute('data-tipo');
     var proc=chk.getAttribute('data-proc');
-    if(chk.checked){ _selecoes[tipo][proc]={resp:chk.getAttribute('data-resp'),prazo:chk.getAttribute('data-prazo'),tipo:chk.getAttribute('data-ttype')}; }
+    if(chk.checked){ _selecoes[tipo][proc]={resp:chk.getAttribute('data-resp'),prazo:chk.getAttribute('data-prazo'),tipo:chk.getAttribute('data-ttype'),parte:chk.getAttribute('data-parte')||'',vara:chk.getAttribute('data-vara')||''}; }
     else { delete _selecoes[tipo][proc]; }
     atualizarBarraSel(tipo);
 }
@@ -854,7 +856,7 @@ function selecionarTodos(tipo,checked){
     document.querySelectorAll('#'+tbId+' .chk-row').forEach(function(cb){
         cb.checked=checked;
         var proc=cb.getAttribute('data-proc');
-        if(checked){ _selecoes[tipo][proc]={resp:cb.getAttribute('data-resp'),prazo:cb.getAttribute('data-prazo'),tipo:cb.getAttribute('data-ttype')}; }
+        if(checked){ _selecoes[tipo][proc]={resp:cb.getAttribute('data-resp'),prazo:cb.getAttribute('data-prazo'),tipo:cb.getAttribute('data-ttype'),parte:cb.getAttribute('data-parte')||'',vara:cb.getAttribute('data-vara')||''}; }
         else { delete _selecoes[tipo][proc]; }
     });
     atualizarBarraSel(tipo);
