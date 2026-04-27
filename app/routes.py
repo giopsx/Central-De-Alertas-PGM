@@ -253,7 +253,12 @@ def favicon():
 
 @bp.route('/painel')
 def painel():
-    return render_template('dashboard.html')
+    from flask import make_response
+    resp = make_response(render_template('dashboard.html'))
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
+    resp.headers['Expires'] = '0'
+    return resp
 
 @bp.route('/api/upload', methods=['POST'])
 @token_required
