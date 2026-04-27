@@ -70,14 +70,25 @@ def cache_set(chave, valor):
     _mem[chave] = valor
     try:
         h = _sb_headers()
-        h['Prefer'] = 'resolution=merge-duplicates,return=minimal'
-        r = http.post(f'{SUPABASE_URL}/rest/v1/dados_cache', headers=h,
-                  json={'chave': chave, 'valor': valor,
-                        'atualizado': datetime.utcnow().isoformat()}, timeout=10)
-        if not r.ok:
-            print(f'[CACHE SET ERROR] {chave}: {r.status_code} {r.text[:200]}')
-        else:
-            print(f'[CACHE SET OK] {chave}')
+        # Tenta UPDATE primeiro
+        r = http.patch(
+            f'{SUPABASE_URL}/rest/v1/dados_cache?chave=eq.{chave}',
+            headers=h,
+            json={'valor': valor, 'atualizado': datetime.utcnow().isoformat()},
+            timeout=15
+        )
+        if r.ok and r.text.strip() not in ('', '[]', 'null'):
+            return
+        # Se nao atualizou nenhuma linha, faz INSERT
+        h2 = {**h, 'Prefer': 'return=minimal'}
+        r2 = http.post(
+            f'{SUPABASE_URL}/rest/v1/dados_cache',
+            headers=h2,
+            json={'chave': chave, 'valor': valor, 'atualizado': datetime.utcnow().isoformat()},
+            timeout=15
+        )
+        if not r2.ok:
+            print(f'[CACHE SET ERROR] {chave}: {r2.status_code} {r2.text[:200]}')
     except Exception as e:
         print(f'[CACHE SET] {chave}: {e}')
 
