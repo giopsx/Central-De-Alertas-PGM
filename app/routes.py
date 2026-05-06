@@ -128,21 +128,34 @@ def _parse_xlsx(file_obj, inativos=None):
     total = venc_nc = prox_count = cumpr = 0
     manuais = cache_get('cumpridos_manuais') or []
 
+    # Detectar índices das colunas pelos cabeçalhos
+    header_row = next(ws.iter_rows(min_row=1, max_row=1, values_only=True))
+    col_idx = {}
+    for i, h in enumerate(header_row):
+        if h:
+            col_idx[str(h).strip().upper()] = i
+    # Mapeamento flexível
+    i_prazo = col_idx.get('PRAZO', 1)
+    i_resp  = col_idx.get('RESPONSÁVEL', col_idx.get('RESPONSAVEL', 2))
+    i_proc  = col_idx.get('Nº DO PROCESSO', col_idx.get('N° DO PROCESSO', col_idx.get('PROCESSO', 4)))
+    i_parte = col_idx.get('PARTE ATIVA', col_idx.get('PARTE', 5))
+    i_vara  = col_idx.get('VARA', 6)
+    i_cumpr = col_idx.get('CUMPRIDO?', col_idx.get('CUMPRIDO', 13))
+
     cumpridos_lista = []
     for row in ws.iter_rows(min_row=2, values_only=True):
         if all(v is None for v in row): continue
-        if row[0] is None and row[1] is None and row[2] is None: continue
+        if len(row) <= i_prazo: continue
 
-        prazo_raw = row[1]
-        resp_raw = row[2]
+        prazo_raw = row[i_prazo]
+        resp_raw = row[i_resp] if len(row) > i_resp else None
         resp = _norm(''.join(c for c in str(resp_raw).strip() if c.isprintable()).strip() if resp_raw is not None else '')
         if not resp: resp = 'Sem responsavel'
-        proc  = str(row[4]).strip() if row[4] else ''
-        parte = str(row[5]).strip()[:60] if row[5] else ''
-        vara  = str(row[6]).strip() if row[6] else ''
+        proc  = str(row[i_proc]).strip() if len(row) > i_proc and row[i_proc] else ''
+        parte = str(row[i_parte]).strip()[:60] if len(row) > i_parte and row[i_parte] else ''
+        vara  = str(row[i_vara]).strip() if len(row) > i_vara and row[i_vara] else ''
 
-        # FIX: strip completo para remover espacos e caracteres invisiveis
-        cumpr_raw = row[13]
+        cumpr_raw = row[i_cumpr] if len(row) > i_cumpr else None
         cumpr_val = str(cumpr_raw).strip().upper() if cumpr_raw is not None else ''
         # Remover caracteres nao-ASCII invisiveis
         cumpr_val = ''.join(c for c in cumpr_val if c.isprintable()).strip()
