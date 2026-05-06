@@ -905,10 +905,19 @@ function abrirWhatsApp(numero,mensagem){
     setTimeout(function(){ document.body.removeChild(a); },500);
 }
 
-function montarMensagem(processo,responsavel,prazo,tipo,parte,vara){
-    var emoji=tipo==='vencido'?'\uD83D\uDD34':'\uD83D\uDFE0';
+function diaLabel(dias,tipo){
+    if(tipo==='vencido') return 'VENCIDO há '+dias+'d';
+    if(dias===0) return 'hoje';
+    if(dias===1) return 'amanhã';
+    return 'em '+dias+' dia(s)';
+}
+
+function montarMensagem(processo,responsavel,prazo,tipo,parte,vara,dias){
     var sit=tipo==='vencido'?'VENCIDO':'A VENCER';
-    return emoji+' *ALERTA DE PRAZO*\nSubprocuradoria Contenciosa - PGM Porto Velho\n\nOlá, '+responsavel+'!\n\nProcesso: *'+processo+'*\nParte: '+(parte||'—')+'\nVara: '+(vara||'—')+'\nPrazo: '+prazo+(tipo==='vencido'?' *(VENCIDO)*':'')+'\n\n_Esta é uma mensagem automática._';
+    var dl=dias!==undefined?diaLabel(dias,tipo):'';
+    return 'ALERTA DE PRAZO ⚠️\nSubprocuradoria Contenciosa - PGM Porto Velho.\n\nOlá, '+responsavel+'!\n\nVocê tem 1 processo com prazo '+sit+(dl?' ('+dl+')':'')+':'+
+        '\n\n1. *'+processo+'*\n   Parte: '+(parte||'—')+'.\n   Vara: '+(vara||'—')+'.\n   Prazo: '+prazo+(dias!==undefined?' ('+dias+'d)':'')+
+        '\n\nEsta é uma mensagem automática.';
 }
 
 function _wppModal(responsavel,mensagem){
@@ -958,8 +967,8 @@ async function alertarHoje(){
         var grupo=grupos[idx++];
         var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
         if(num){
-            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'-')+'\n   Vara: '+(d.vara||'-')+'\n   Prazo: '+d.prazo; }).join('\n\n');
-            var msg='&#x1F7E0; *ALERTA DE PRAZO*\nSubprocuradoria Contenciosa - PGM Porto Velho\n\nOl\u00E1, '+grupo.resp+'!\n\nVoc\u00EA tem *'+grupo.processos.length+' processo(s)* com prazo HOJE:\n\n'+linhas+'\n\n_Esta \u00E9 uma mensagem autom\u00E1tica._';
+            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'—')+'.\n   Vara: '+(d.vara||'—')+'.\n   Prazo: '+d.prazo+(d.dias!==undefined?' ('+d.dias+'d)':''); }).join('\n');
+            var msg='ALERTA DE PRAZO ⚠️\nSubprocuradoria Contenciosa - PGM Porto Velho.\n\nOlá, '+grupo.resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo A VENCER dia '+grupo.processos[0].prazo+' (hoje):\n\n'+linhas+'\n\nEsta é uma mensagem automática.';
             abrirWhatsApp(num,msg); setTimeout(prox,2000);
         } else { if(grupo.resp&&semNumero.indexOf(grupo.resp)<0) semNumero.push(grupo.resp); prox(); }
     }
@@ -978,8 +987,8 @@ async function alertarTodosProximos(){
         var grupo=grupos[idx++];
         var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
         if(num){
-            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'-')+'\n   Vara: '+(d.vara||'-')+'\n   Prazo: '+d.prazo+(d.dias===0?'':' ('+d.dias+'d)'); }).join('\n\n');
-            var msg='&#x1F7E0; *ALERTA DE PRAZO*\nSubprocuradoria Contenciosa - PGM Porto Velho\n\nOl\u00E1, '+grupo.resp+'!\n\nVoc\u00EA tem *'+grupo.processos.length+' processo(s)* com prazo A VENCER:\n\n'+linhas+'\n\n_Esta \u00E9 uma mensagem autom\u00E1tica._';
+            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'—')+'.\n   Vara: '+(d.vara||'—')+'.\n   Prazo: '+d.prazo+(d.dias!==undefined?' ('+d.dias+'d)':''); }).join('\n');
+            var msg='ALERTA DE PRAZO ⚠️\nSubprocuradoria Contenciosa - PGM Porto Velho.\n\nOlá, '+grupo.resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo A VENCER dia '+grupo.processos[0].prazo+' ('+diaLabel(grupo.processos[0].dias,'proximo')+'):\n\n'+linhas+'\n\nEsta é uma mensagem automática.';
             abrirWhatsApp(num,msg); setTimeout(prox,2000);
         } else { if(grupo.resp&&semNumero.indexOf(grupo.resp)<0) semNumero.push(grupo.resp); prox(); }
     }
@@ -998,8 +1007,8 @@ async function alertarTodosVencidos(){
         var grupo=grupos[idx++];
         var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
         if(num){
-            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'-')+'\n   Vara: '+(d.vara||'-')+'\n   Prazo: '+d.prazo+' *(VENCIDO)*'; }).join('\n\n');
-            var msg='&#x1F534; *ALERTA DE PRAZO*\nSubprocuradoria Contenciosa - PGM Porto Velho\n\nOl\u00E1, '+grupo.resp+'!\n\nVoc\u00EA tem *'+grupo.processos.length+' processo(s)* com prazo VENCIDO:\n\n'+linhas+'\n\n_Esta \u00E9 uma mensagem autom\u00E1tica._';
+            var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'—')+'.\n   Vara: '+(d.vara||'—')+'.\n   Prazo: '+d.prazo+' (VENCIDO)'; }).join('\n');
+            var msg='ALERTA DE PRAZO ⚠️\nSubprocuradoria Contenciosa - PGM Porto Velho.\n\nOlá, '+grupo.resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo VENCIDO:\n\n'+linhas+'\n\nEsta é uma mensagem automática.';
             abrirWhatsApp(num,msg); setTimeout(prox,2000);
         } else { if(grupo.resp&&semNumero.indexOf(grupo.resp)<0) semNumero.push(grupo.resp); prox(); }
     }
@@ -1037,9 +1046,9 @@ async function alertarSelecionados(tipo){
             var emoji=tipo==='vencido'?'\uD83D\uDD34':'\uD83D\uDFE0';
             var sit=tipo==='vencido'?'VENCIDO':'A VENCER';
             var linhas=grupo.processos.map(function(d,i){
-                return (i+1)+'. *'+(d.proc||d.processo||'')+'*\n   Parte: '+(d.parte||'—')+'\n   Vara: '+(d.vara||'—')+'\n   Prazo: '+d.prazo+(tipo==='vencido'?' *(VENCIDO)*':'');
+                return (i+1)+'. *'+(d.proc||d.processo||'')+'*\n   Parte: '+(d.parte||'—')+'.\n   Vara: '+(d.vara||'—')+'.\n   Prazo: '+d.prazo+(tipo==='vencido'?' (VENCIDO)':'');
             }).join('\n\n');
-            var msg=emoji+' *ALERTA DE PRAZO*\nSubprocuradoria Contenciosa - PGM Porto Velho\n\nOlá, '+resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo '+sit+':\n\n'+linhas+'\n\n_Esta é uma mensagem automática._';
+            var msg='ALERTA DE PRAZO ⚠️\nSubprocuradoria Contenciosa - PGM Porto Velho.\n\nOlá, '+resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo '+sit+':\n\n'+linhas+'\n\nEsta é uma mensagem automática.';
             abrirWhatsApp(num,msg);
             setTimeout(prox,2000);
         } else {
@@ -1281,6 +1290,18 @@ function toggleDark(){
 if(localStorage.getItem('pgm-dark')==='1'){ _isDark=false; toggleDark(); }
 
 // ── PDF ───────────────────────────────────────────────────────────────────────
+function pdfText(str){
+    // jsPDF Helvetica nao suporta acentos - converter para ASCII
+    return (str||'')
+        .replace(/[áàãâä]/g,'a').replace(/[ÁÀÃÂÄ]/g,'A')
+        .replace(/[éèêë]/g,'e').replace(/[ÉÈÊË]/g,'E')
+        .replace(/[íìîï]/g,'i').replace(/[ÍÌÎÏ]/g,'I')
+        .replace(/[óòõôö]/g,'o').replace(/[ÓÒÕÔÖ]/g,'O')
+        .replace(/[úùûü]/g,'u').replace(/[ÚÙÛÜ]/g,'U')
+        .replace(/[ç]/g,'c').replace(/[Ç]/g,'C')
+        .replace(/[ñ]/g,'n').replace(/[Ñ]/g,'N');
+}
+
 async function generateReport(type){
     var overlay=document.getElementById('pdf-overlay');
     var statusEl=document.getElementById('pdf-status');
@@ -1296,17 +1317,17 @@ async function generateReport(type){
         function cabecalho(titulo){
             pdf.setFillColor(8,12,20); pdf.rect(0,0,pageW,26,'F');
             pdf.setTextColor(255,255,255); pdf.setFontSize(12); pdf.setFont('helvetica','bold');
-            pdf.text('Subprocuradoria Contenciosa - PGM Porto Velho',margin,10);
+            pdf.text(pdfText('Subprocuradoria Contenciosa - PGM Porto Velho'),margin,10);
             pdf.setFontSize(9); pdf.setFont('helvetica','normal');
-            pdf.text(titulo+' - Gerado em '+hoje,margin,19);
+            pdf.text(pdfText(titulo+' - Gerado em '+hoje),margin,19);
             return 32;
         }
         function rodape(){
             var n=pdf.internal.getNumberOfPages();
             for(var i=1;i<=n;i++){
                 pdf.setPage(i); pdf.setFontSize(7); pdf.setTextColor(150,150,170);
-                pdf.text('Subprocuradoria Contenciosa - PGM Porto Velho',margin,pageH-5);
-                pdf.text('Pag. '+i+'/'+n,pageW-margin,pageH-5,{align:'right'});
+                pdf.text(pdfText('Subprocuradoria Contenciosa - PGM Porto Velho'),margin,pageH-5);
+                pdf.text(pdfText('Pag. '+i+'/'+n),pageW-margin,pageH-5,{align:'right'});
             }
         }
         var tituloRel=type==='semanal'?'Relatório Semanal':type==='mensal'?'Relatório Mensal':type==='individual'?'Relatório Individual':'Relatório de Críticos';
@@ -1319,22 +1340,22 @@ async function generateReport(type){
             taxa:(document.getElementById('kpi-taxa-label')?.textContent||'0% de taxa').replace('% de taxa','')+'%',
         };
         if(type==='semanal'||type==='mensal'){
-            pdf.autoTable({startY:y,head:[['Indicador','Valor']],
+            pdf.autoTable({startY:y,head:[[pdfText('Indicador'),pdfText('Valor')]],
                 body:[['Total',statsKpis.total],['Vencidos',statsKpis.vencidos],['Próximos 7 dias',statsKpis.proximos],['Cumpridos',statsKpis.cumpridos],['Taxa',statsKpis.taxa]],
                 theme:'striped',headStyles:{fillColor:[8,12,20],textColor:255,fontStyle:'bold',fontSize:9},bodyStyles:{fontSize:9},margin:{left:margin,right:margin}});
             y=pdf.lastAutoTable.finalY+8;
             if(PROXIMOS7.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(180,100,0);
-                pdf.text('Vencendo nos Próximos 7 Dias ('+PROXIMOS7.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsável','Prazo','Vence em']],
+                pdf.text(pdfText('Vencendo nos Próximos 7 Dias ('+PROXIMOS7.length+')'),margin,y);y+=4;
+                pdf.autoTable({startY:y,head:[[pdfText('Processo'),pdfText('Parte'),pdfText('Responsável'),pdfText('Prazo'),pdfText('Vence em')]],
                     body:PROXIMOS7.map(function(r){var d=r.dias||0;return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',d===0?'Hoje':d+'d'];}),
                     theme:'striped',headStyles:{fillColor:[180,100,0],textColor:255,fontStyle:'bold',fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
             }
             if(type==='mensal'&&VENCIDOS_DATA.length){
                 y=pdf.lastAutoTable.finalY+8;
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(200,30,30);
-                pdf.text('Vencidos ('+VENCIDOS_DATA.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsável','Prazo','Dias']],
+                pdf.text(pdfText('Vencidos ('+VENCIDOS_DATA.length+')'),margin,y);y+=4;
+                pdf.autoTable({startY:y,head:[[pdfText('Processo'),pdfText('Parte'),pdfText('Responsável'),pdfText('Prazo'),pdfText('Dias')]],
                     body:VENCIDOS_DATA.map(function(r){return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',r.dias+'d'];}),
                     theme:'striped',headStyles:{fillColor:[200,30,30],textColor:255,fontStyle:'bold',fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
             }
@@ -1356,7 +1377,7 @@ async function generateReport(type){
             var meusP=PROXIMOS7.filter(function(r){return (r.resp||'').toUpperCase()===resp.toUpperCase();});
             statusEl.textContent='Gerando PDF...';
             pdf.setFontSize(14);pdf.setFont('helvetica','bold');pdf.setTextColor(20,30,60);
-            pdf.text('Responsável: '+resp,margin,y);y+=14;
+            pdf.text(pdfText('Responsável: '+resp),margin,y);y+=14;
             var taxaC=perfDados.taxa>=60?[5,122,85]:perfDados.taxa>=40?[194,120,3]:[224,36,36];
             var cardW=(pageW-margin*2-9)/4;
             [{label:'TOTAL',val:String(perfDados.total||0),color:[26,86,219]},{label:'CUMPRIDOS',val:String(perfDados.cumpridos||meusCumpridos.length||0),color:[5,122,85]},{label:'TAXA',val:(perfDados.taxa||0).toFixed(1)+'%',color:taxaC},{label:'CRITICOS',val:String(perfDados.criticos||meusV.length||0),color:[224,36,36]}].forEach(function(card,ci){
@@ -1364,43 +1385,43 @@ async function generateReport(type){
                 pdf.setFillColor(240,244,252);pdf.rect(cx,y,cardW,22,'F');
                 pdf.setFillColor(card.color[0],card.color[1],card.color[2]);pdf.rect(cx,y,cardW,3,'F');
                 pdf.setFontSize(18);pdf.setFont('helvetica','bold');pdf.setTextColor(card.color[0],card.color[1],card.color[2]);
-                pdf.text(card.val,cx+cardW/2,y+15,{align:'center'});
+                pdf.text(pdfText(card.val),cx+cardW/2,y+15,{align:'center'});
                 pdf.setFontSize(7);pdf.setFont('helvetica','normal');pdf.setTextColor(100,116,139);
-                pdf.text(card.label,cx+cardW/2,y+20,{align:'center'});
+                pdf.text(pdfText(card.label),cx+cardW/2,y+20,{align:'center'});
             });
             y+=28;
             if(meusCumpridos.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(5,122,85);
-                pdf.text('Cumpridos ('+meusCumpridos.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Prazo','Vara']],body:meusCumpridos.map(function(r){return [r.processo||'',r.parte||'',r.prazo||'',r.vara||''];}),theme:'striped',headStyles:{fillColor:[5,122,85],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
+                pdf.text(pdfText('Cumpridos ('+meusCumpridos.length+')'),margin,y);y+=4;
+                pdf.autoTable({startY:y,head:[[pdfText('Processo'),pdfText('Parte'),pdfText('Prazo'),pdfText('Vara')]],body:meusCumpridos.map(function(r){return [r.processo||'',r.parte||'',r.prazo||'',r.vara||''];}),theme:'striped',headStyles:{fillColor:[5,122,85],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
                 y=pdf.lastAutoTable.finalY+8;
             }
             if(meusP.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(180,100,0);
-                pdf.text('Próximos 7 Dias ('+meusP.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Prazo','Vence em']],body:meusP.map(function(r){return [r.proc||'',r.parte||'',r.prazo||'',r.dias+'d'];}),theme:'striped',headStyles:{fillColor:[180,100,0],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
+                pdf.text(pdfText('Próximos 7 Dias ('+meusP.length+')'),margin,y);y+=4;
+                pdf.autoTable({startY:y,head:[[pdfText('Processo'),pdfText('Parte'),pdfText('Prazo'),pdfText('Vence em')]],body:meusP.map(function(r){return [r.proc||'',r.parte||'',r.prazo||'',r.dias+'d'];}),theme:'striped',headStyles:{fillColor:[180,100,0],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
                 y=pdf.lastAutoTable.finalY+8;
             }
             if(meusV.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(200,30,30);
-                pdf.text('Vencidos ('+meusV.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Prazo','Dias']],body:meusV.map(function(r){return [r.proc||'',r.parte||'',r.prazo||'',r.dias+'d'];}),theme:'striped',headStyles:{fillColor:[200,30,30],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
+                pdf.text(pdfText('Vencidos ('+meusV.length+')'),margin,y);y+=4;
+                pdf.autoTable({startY:y,head:[[pdfText('Processo'),pdfText('Parte'),pdfText('Prazo'),pdfText('Dias')]],body:meusV.map(function(r){return [r.proc||'',r.parte||'',r.prazo||'',r.dias+'d'];}),theme:'striped',headStyles:{fillColor:[200,30,30],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
             }
             if(!meusCumpridos.length&&!meusP.length&&!meusV.length){
                 pdf.setFontSize(11);pdf.setTextColor(100,116,139);
-                pdf.text('Nenhum processo encontrado para este responsável.',margin,y);
+                pdf.text(pdfText('Nenhum processo encontrado para este responsável.'),margin,y);
             }
         } else if(type==='criticos'){
             if(PROXIMOS7.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(180,100,0);
-                pdf.text('Próximos 7 Dias ('+PROXIMOS7.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsável','Prazo','Vence em']],body:PROXIMOS7.map(function(r){var d=r.dias||0;return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',d===0?'Hoje':d+'d'];}),theme:'striped',headStyles:{fillColor:[180,100,0],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
+                pdf.text(pdfText('Próximos 7 Dias ('+PROXIMOS7.length+')'),margin,y);y+=4;
+                pdf.autoTable({startY:y,head:[[pdfText('Processo'),pdfText('Parte'),pdfText('Responsável'),pdfText('Prazo'),pdfText('Vence em')]],body:PROXIMOS7.map(function(r){var d=r.dias||0;return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',d===0?'Hoje':d+'d'];}),theme:'striped',headStyles:{fillColor:[180,100,0],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
                 y=pdf.lastAutoTable.finalY+8;
             }
             if(VENCIDOS_DATA.length){
                 pdf.setFontSize(10);pdf.setFont('helvetica','bold');pdf.setTextColor(200,30,30);
-                pdf.text('Vencidos ('+VENCIDOS_DATA.length+')',margin,y);y+=4;
-                pdf.autoTable({startY:y,head:[['Processo','Parte','Responsável','Prazo','Dias']],body:VENCIDOS_DATA.map(function(r){return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',r.dias+'d'];}),theme:'striped',headStyles:{fillColor:[200,30,30],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
+                pdf.text(pdfText('Vencidos ('+VENCIDOS_DATA.length+')'),margin,y);y+=4;
+                pdf.autoTable({startY:y,head:[[pdfText('Processo'),pdfText('Parte'),pdfText('Responsável'),pdfText('Prazo'),pdfText('Dias')]],body:VENCIDOS_DATA.map(function(r){return [r.proc||'',r.parte||'',r.resp||'',r.prazo||'',r.dias+'d'];}),theme:'striped',headStyles:{fillColor:[200,30,30],textColor:255,fontSize:8},bodyStyles:{fontSize:7},margin:{left:margin,right:margin}});
             }
         }
         rodape();
