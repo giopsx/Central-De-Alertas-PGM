@@ -115,10 +115,13 @@ def _eh_pessoa(nome):
 
 def _parse_xlsx(file_obj, inativos=None):
     import openpyxl, warnings
+    from datetime import timezone, timedelta
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         wb = openpyxl.load_workbook(file_obj, read_only=True, data_only=True)
-    today = date.today()
+    # Rondônia é UTC-4
+    tz_ro = timezone(timedelta(hours=-4))
+    today = datetime.now(tz_ro).date()
     ws = wb['Prazos 2026']
     perf = {}
     prox, venc = [], []
@@ -317,7 +320,9 @@ def get_dashboard():
 @bp.route('/api/criticos')
 @token_required
 def get_criticos():
-    hoje = date.today()
+    from datetime import timezone, timedelta
+    tz_ro = timezone(timedelta(hours=-4))
+    hoje = datetime.now(tz_ro).date()
 
     todos_proximos = cache_get('proximos') or []
     todos_vencidos = cache_get('vencidos') or []
