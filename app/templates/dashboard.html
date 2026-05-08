@@ -14,7 +14,7 @@
 <style>
 :root{
   --bg:#f0f4f8;
-  --bg2:#0d1220;
+  --bg2:#1a5a6c;
   --bg3:#f1f5f9;
   --surface:#ffffff;
   --surface2:#f8fafc;
@@ -23,9 +23,9 @@
   --text:#0d1117;
   --text2:#4a5568;
   --text3:#8492a6;
-  --accent:#3b7fff;
-  --accent2:#5b9aff;
-  --accent-glow:rgba(59,127,255,.18);
+  --accent:#0f9668;
+  --accent2:#1abd82;
+  --accent-glow:rgba(15,150,104,.18);
   --red:#ff4757;
   --red-dim:rgba(255,71,87,.12);
   --amber:#ffb300;
@@ -35,20 +35,22 @@
   --r:14px; --r2:10px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;position:relative}
+html::before{content:'';position:fixed;top:0;left:0;right:0;bottom:0;background:url('/static/pgm-logo.jpg') no-repeat center fixed;background-size:auto 80vh;background-position:center;opacity:0.55;pointer-events:none;z-index:-1}
+body{position:relative;z-index:1}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;min-height:100vh}
 
-.hdr{background:rgba(26,58,92,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);position:sticky;top:0;z-index:200;}
+.hdr{background:linear-gradient(90deg,#1a5a6c,#0f9668);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);position:sticky;top:0;z-index:200;}
 .hdr-in{max-width:1400px;margin:0 auto;padding:0 28px;height:62px;display:flex;align-items:center;gap:20px}
 .hdr-logo{display:flex;align-items:center;gap:10px}
-.hdr-emblem{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#2563eb,#3b7fff);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(59,127,255,.4);}
+.hdr-emblem{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#0f9668,#1abd82);display:flex;align-items:center;justify-content:center;box-shadow:0 0 16px rgba(15,150,104,.4);}
 .hdr-emblem svg{width:17px;height:17px;stroke:#fff;fill:none;stroke-width:2}
-.hdr-brand{font-size:13px;font-weight:700;color:var(--text);letter-spacing:-.01em}
-.hdr-divider{width:1px;height:28px;background:var(--border);margin:0 8px}
-.hdr-title{font-size:13px;font-weight:500;color:var(--text2);flex:1;text-align:center}
+.hdr-brand{font-size:13px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.hdr-divider{width:1px;height:28px;background:rgba(255,255,255,.2);margin:0 8px}
+.hdr-title{font-size:13px;font-weight:500;color:#fff;flex:1;text-align:center}
 .hdr-actions{display:flex;align-items:center;gap:8px}
-.hdr-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;background:var(--surface);border:1px solid var(--border);font-size:11px;color:var(--text2);cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;}
-.hdr-pill:hover{border-color:var(--accent);color:var(--accent)}
+.hdr-pill{display:flex;align-items:center;gap:5px;padding:5px 11px;border-radius:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);font-size:11px;color:#fff;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;}
+.hdr-pill:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.2)}
 .hdr-pill svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2}
 .online-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green)}
 
