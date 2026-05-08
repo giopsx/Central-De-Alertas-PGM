@@ -416,7 +416,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <strong><span id="count-próximos-vencer">0</span> processos</strong> vencem nos próximos 7 dias
     </span>
-    <button class="btn btn-amber" onclick="alertarTodosPróximos()">Alertar Todos</button>
+    <button class="btn btn-amber" onclick="alertarTodosProximos()">Alertar Todos</button>
   </div>
   <div class="fb">
     <div class="sw"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="filtro-próximos" type="text" placeholder="Buscar processo, responsavel ou parte..."></div>
@@ -988,7 +988,7 @@ async function alertarHoje(){
     }
     prox();
 }
-async function alertarTodosPróximos(){
+async function alertarTodosProximos(){
     var filtrado=filtrarDados(PROXIMOS7,filtroState.próximos);
     if(!filtrado.length){ alert('Nenhum processo encontrado.'); return; }
     if(!confirm('Abrir WhatsApp para os '+filtrado.length+' processos criticos?')) return;
