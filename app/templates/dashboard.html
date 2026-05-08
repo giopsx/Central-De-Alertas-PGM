@@ -69,7 +69,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .main{flex:1;min-width:0}
 .tab-content{display:none}
 .tab-content.active{display:block;animation:fu .22s ease}
-@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframês fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
 .ph{margin-bottom:24px}
 .ph h2{font-size:24px;font-weight:800;letter-spacing:-.03em;color:var(--text)}
@@ -193,7 +193,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 #pdf-overlay.show{display:flex}
 #pdf-overlay p{color:#fff;font-size:15px;font-weight:600}
 .pdf-spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,.1);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
+@keyframês spin{to{transform:rotate(360deg)}}
 
 .pr-bar{width:100%;height:4px;border-radius:4px;background:var(--border);overflow:hidden;margin-top:4px}
 .pr-fill{height:100%;border-radius:4px;background:var(--accent);transition:width .4s}
@@ -270,7 +270,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     </button>
     <button class="ni" onclick="switchTab(event,'criticos')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      Proximos 7 Dias
+      Próximos 7 Dias
       <span class="nbadge" id="nb-c">0</span>
     </button>
     <button class="ni" onclick="switchTab(event,'vencidos')">
@@ -281,7 +281,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     <div class="sdb-section">Ferramentas</div>
     <button class="ni" onclick="switchTab(event,'relatorios')">
       <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-      Relatorios
+      Relatórios
     </button>
     <button class="ni" onclick="switchTab(event,'equipe')">
       <svg viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -322,8 +322,8 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     </div>
     <div class="kc amber" style="cursor:pointer" onclick="switchTabByName('criticos')">
       <div class="kc-glow"></div>
-      <div class="kc-top"><span class="kc-lbl">Proximos 7 dias</span><div class="kc-ico"><svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div></div>
-      <div class="kc-val" id="kpi-proximos">0</div>
+      <div class="kc-top"><span class="kc-lbl">Próximos 7 dias</span><div class="kc-ico"><svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div></div>
+      <div class="kc-val" id="kpi-próximos">0</div>
       <div class="kc-sub" style="color:var(--amber);font-weight:600">Atenção urgente</div>
       <div class="kc-bar"></div>
     </div>
@@ -337,15 +337,15 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
   </div>
   <div style="display:grid;grid-template-columns:1fr 320px;gap:16px">
     <div class="card" style="margin-bottom:0">
-      <div class="ch"><div><div class="ct">Performance por Responsavel</div><div class="cs">Taxa de cumprimento de prazos</div></div></div>
+      <div class="ch"><div><div class="ct">Performance por Responsável</div><div class="cs">Taxa de cumprimento de prazos</div></div></div>
       <div id="chart-wrap" style="position:relative;min-height:200px"><canvas id="chart-performance"></canvas></div>
       <div style="margin-top:16px;overflow-x:auto">
-        <table><thead><tr><th>Responsavel</th><th>Total</th><th>Cumpridos</th><th>Taxa</th><th>Criticos</th></tr></thead>
+        <table><thead><tr><th>Responsável</th><th>Total</th><th>Cumpridos</th><th>Taxa</th><th>Críticos</th></tr></thead>
         <tbody id="tbody-performance"><tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3)">Carregando...</td></tr></tbody></table>
       </div>
     </div>
     <div class="card" style="margin-bottom:0">
-      <div class="ch"><div><div class="ct">Proximos a Vencer</div><div class="cs">Ate 7 dias</div></div><button class="va" onclick="switchTabByName('criticos')">Ver todos</button></div>
+      <div class="ch"><div><div class="ct">Próximos a Vencer</div><div class="cs">Ate 7 dias</div></div><button class="va" onclick="switchTabByName('criticos')">Ver todos</button></div>
       <div id="prazos-recentes"><div style="color:var(--text3);font-size:13px">Carregando...</div></div>
     </div>
   </div>
@@ -402,7 +402,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     </button>
   </div>
   <div class="tw"><table>
-    <thead><tr><th style="width:36px"></th><th>Processo</th><th>Parte</th><th>Responsavel</th><th>Prazo</th><th>Vara</th><th>Acoes</th></tr></thead>
+    <thead><tr><th style="width:36px"></th><th>Processo</th><th>Parte</th><th>Responsável</th><th>Prazo</th><th>Vara</th><th>Ações</th></tr></thead>
     <tbody id="tbody-hoje"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
   </table></div>
   <div class="pbar" id="pag-hoje"></div>
@@ -410,21 +410,21 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 
 <!-- PROXIMOS 7 DIAS -->
 <div id="criticos" class="tab-content">
-  <div class="ph"><h2>Proximos 7 Dias</h2><p>Processos com prazo vencendo nos proximos 7 dias, nao cumpridos.</p></div>
+  <div class="ph"><h2>Próximos 7 Dias</h2><p>Processos com prazo vencendo nos próximos 7 dias, nao cumpridos.</p></div>
   <div class="alert aa" style="justify-content:space-between">
     <span style="display:flex;align-items:center;gap:8px">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <strong><span id="count-proximos-vencer">0</span> processos</strong> vencem nos proximos 7 dias
+      <strong><span id="count-próximos-vencer">0</span> processos</strong> vencem nos próximos 7 dias
     </span>
-    <button class="btn btn-amber" onclick="alertarTodosProximos()">Alertar Todos</button>
+    <button class="btn btn-amber" onclick="alertarTodosPróximos()">Alertar Todos</button>
   </div>
   <div class="fb">
-    <div class="sw"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="filtro-proximos" type="text" placeholder="Buscar processo, responsavel ou parte..."></div>
-    <select id="resp-proximos" class="fsel"><option value="">Todos responsaveis</option></select>
+    <div class="sw"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="filtro-próximos" type="text" placeholder="Buscar processo, responsavel ou parte..."></div>
+    <select id="resp-próximos" class="fsel"><option value="">Todos responsaveis</option></select>
     <div style="display:flex;align-items:center;gap:6px">
       <label style="font-size:12px;color:var(--text2);white-space:nowrap">Prazo:</label>
-      <input id="data-proximos" type="date" class="fsel" style="padding:7px 10px;cursor:pointer">
-      <button onclick="document.getElementById('data-proximos').value='';filtroState.proximos.data='';pagState.critico=1;renderPagina('critico')" style="padding:6px 8px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-size:11px">✕</button>
+      <input id="data-próximos" type="date" class="fsel" style="padding:7px 10px;cursor:pointer">
+      <button onclick="document.getElementById('data-próximos').value='';filtroState.próximos.data='';pagState.critico=1;renderPagina('critico')" style="padding:6px 8px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-size:11px">✕</button>
     </div>
     <button onclick="exportarXlsx('critico')" class="xbtn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Excel</button>
   </div>
@@ -436,8 +436,8 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     </button>
   </div>
   <div class="tw"><table>
-    <thead><tr><th style="width:36px"></th><th>Processo</th><th>Parte</th><th>Responsavel</th><th>Prazo</th><th>Vence em</th><th>Vara</th><th>Acoes</th></tr></thead>
-    <tbody id="tbody-proximos-vencer"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
+    <thead><tr><th style="width:36px"></th><th>Processo</th><th>Parte</th><th>Responsável</th><th>Prazo</th><th>Vence em</th><th>Vara</th><th>Ações</th></tr></thead>
+    <tbody id="tbody-próximos-vencer"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
   </table></div>
   <div class="pbar" id="pag-criticos"></div>
 </div>
@@ -466,7 +466,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     <button onclick="exportarXlsx('critico')" class="xbtn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Excel</button>
   </div>
   <div class="tw"><table>
-    <thead><tr><th>Processo</th><th>Parte</th><th>Responsavel</th><th>Prazo</th><th>Dias Vencido</th><th>Vara</th><th>Acoes</th></tr></thead>
+    <thead><tr><th>Processo</th><th>Parte</th><th>Responsável</th><th>Prazo</th><th>Dias Vencido</th><th>Vara</th><th>Ações</th></tr></thead>
     <tbody id="tbody-vencidos"><tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
   </table></div>
   <div class="pbar" id="pag-vencidos"></div>
@@ -474,12 +474,12 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 
 <!-- RELATORIOS -->
 <div id="relatorios" class="tab-content">
-  <div class="ph"><h2>Relatorios</h2><p>Exporte relatorios em PDF para compartilhamento e analise.</p></div>
+  <div class="ph"><h2>Relatórios</h2><p>Exporte relatorios em PDF para compartilhamento e análise.</p></div>
   <div class="rg">
-    <div class="rc"><div class="ri" style="background:rgba(59,127,255,.12)"><svg viewBox="0 0 24 24" stroke="var(--accent2)"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div><h3>Relatorio Semanal</h3><p>Resumo de prazos cumpridos, vencidos e proximos da semana.</p><button class="btn btn-blue" onclick="generateReport('semanal')">Gerar PDF</button></div>
-    <div class="rc"><div class="ri" style="background:var(--green-dim)"><svg viewBox="0 0 24 24" stroke="var(--green)"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div><h3>Relatorio Mensal</h3><p>Analise detalhada do mes com performance por procurador.</p><button class="btn btn-blue" onclick="generateReport('mensal')">Gerar PDF</button></div>
-    <div class="rc"><div class="ri" style="background:var(--amber-dim)"><svg viewBox="0 0 24 24" stroke="var(--amber)"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div><h3>Relatorio Individual</h3><p>Performance de um responsavel especifico.</p><select id="select-relatorio-individual" class="fi" style="margin-bottom:4px"><option value="">Selecione...</option></select><button class="btn btn-blue" onclick="generateReport('individual')">Gerar PDF</button></div>
-    <div class="rc"><div class="ri" style="background:var(--red-dim)"><svg viewBox="0 0 24 24" stroke="var(--red)"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h3>Relatorio Criticos</h3><p>Todos os vencidos e proximos de vencer.</p><button class="btn btn-blue" onclick="generateReport('criticos')">Gerar PDF</button></div>
+    <div class="rc"><div class="ri" style="background:rgba(59,127,255,.12)"><svg viewBox="0 0 24 24" stroke="var(--accent2)"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div><h3>Relatório Semanal</h3><p>Resumo de prazos cumpridos, vencidos e próximos da semana.</p><button class="btn btn-blue" onclick="generateReport('semanal')">Gerar PDF</button></div>
+    <div class="rc"><div class="ri" style="background:var(--green-dim)"><svg viewBox="0 0 24 24" stroke="var(--green)"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg></div><h3>Relatório Mensal</h3><p>Análise detalhada do mês com performance por procurador.</p><button class="btn btn-blue" onclick="generateReport('mensal')">Gerar PDF</button></div>
+    <div class="rc"><div class="ri" style="background:var(--amber-dim)"><svg viewBox="0 0 24 24" stroke="var(--amber)"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg></div><h3>Relatório Individual</h3><p>Performance de um responsavel específico.</p><select id="select-relatorio-individual" class="fi" style="margin-bottom:4px"><option value="">Selecione...</option></select><button class="btn btn-blue" onclick="generateReport('individual')">Gerar PDF</button></div>
+    <div class="rc"><div class="ri" style="background:var(--red-dim)"><svg viewBox="0 0 24 24" stroke="var(--red)"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><h3>Relatório Críticos</h3><p>Todos os vencidos e próximos de vencer.</p><button class="btn btn-blue" onclick="generateReport('criticos')">Gerar PDF</button></div>
   </div>
 </div>
 
@@ -516,7 +516,7 @@ var _selecoes    = { hoje:{}, critico:{} };
 var _contatosCache = null;
 var POR_PAG = 25;
 var pagState    = { hoje:1, critico:1, vencido:1 };
-var filtroState = { hoje:{texto:'',resp:'',vara:''}, critico:{texto:'',resp:'',vara:'',data:''}, proximos:{texto:'',resp:'',data:''}, vencido:{texto:'',resp:'',vara:''} };
+var filtroState = { hoje:{texto:'',resp:'',vara:''}, critico:{texto:'',resp:'',vara:'',data:''}, próximos:{texto:'',resp:'',data:''}, vencido:{texto:'',resp:'',vara:''} };
 var _chartInstance = null;
 var _isDark = false;
 
@@ -546,7 +546,7 @@ async function importarPlanilha(){
             var d=json.diff||{};
             alert('Planilha importada com sucesso!\n\n'+
                 s.total+' processos | '+s.vencidos+' vencidos | '+
-                s.proximos+' proximos | '+s.taxa+'% cumpridos');
+                s.próximos+' próximos | '+s.taxa+'% cumpridos');
             // Mostrar diff
             if(d.total_delta!==undefined){
                 var sinal=function(n){return n>0?'+'+n:String(n);};
@@ -570,7 +570,7 @@ async function importarPlanilha(){
             alert('Erro ao importar: '+(json.error||'Falha desconhecida'));
         }
     } catch(err){
-        alert('Erro de rede: '+err.message);
+        alert('Erro de rede: '+err.mêssage);
     } finally {
         btn.textContent='Importar Planilha';
         btn.disabled=false;
@@ -591,9 +591,9 @@ async function loadDashboard(){
             apiOk=true;
             try{ localStorage.setItem('pgm_dash_cache',JSON.stringify(dashData)); }catch(e){}
         }
-        if(critData) renderCriticos(critData);
+        if(critData) renderCríticos(critData);
         popularSelectsResponsaveis();
-    } catch(e){ console.warn('API indisponivel:',e.message); }
+    } catch(e){ console.warn('API indisponivel:',e.mêssage); }
     if(!apiOk){
         try{
             var dl=JSON.parse(localStorage.getItem('pgm_dash_cache')||'null');
@@ -606,18 +606,18 @@ async function loadDashboard(){
 function renderDashboard(data){
     if(data&&!data.sem_dados&&data.stats){
         var kpis=data.stats;
-        ['total','vencidos','proximos','cumpridos'].forEach(function(k){
+        ['total','vencidos','próximos','cumpridos'].forEach(function(k){
             var el=document.getElementById('kpi-'+k); if(el) el.textContent=kpis[k]||0;
         });
         var tx=document.getElementById('kpi-taxa-label');
         if(tx){ tx.textContent=(kpis.taxa||0)+'% de taxa'; tx.style.color='var(--green)'; tx.style.fontWeight='600'; }
-        if(data.performance){ renderChart(data.performance); renderTabelaPerf(data.performance); popularSelectRelatorio(data.performance); }
+        if(data.performance){ renderChart(data.performance); renderTabelaPerf(data.performance); popularSelectRelatório(data.performance); }
         if(data.filename){
             var hh=document.getElementById('import-history');
             if(hh) hh.innerHTML='<li style="font-size:13px;color:var(--text)"><strong>'+data.filename+'</strong></li>';
         }
     } else {
-        ['total','vencidos','proximos','cumpridos'].forEach(function(k){
+        ['total','vencidos','próximos','cumpridos'].forEach(function(k){
             var el=document.getElementById('kpi-'+k); if(el) el.textContent='—';
         });
         var tx2=document.getElementById('kpi-taxa-label');
@@ -630,7 +630,7 @@ function renderDashboard(data){
 
 function atualizarBadges(){
     var nh=document.getElementById('nb-hoje'),nc=document.getElementById('nb-c'),nv=document.getElementById('nb-v');
-    var eh=document.getElementById('kpi-hoje'),ep=document.getElementById('kpi-proximos');
+    var eh=document.getElementById('kpi-hoje'),ep=document.getElementById('kpi-próximos');
     if(nh) nh.textContent=HOJE_DATA.length;
     if(nc) nc.textContent=PROXIMOS7.length;
     if(nv) nv.textContent=VENCIDOS_DATA.length;
@@ -650,9 +650,9 @@ function calcDias(prazoStr){
     } catch(e){ return 0; }
 }
 
-function renderCriticos(data){
-    if(data&&data.proximos){
-        var todos=data.proximos.map(function(r){
+function renderCríticos(data){
+    if(data&&data.próximos){
+        var todos=data.próximos.map(function(r){
             var diasReal=calcDias(r.prazo);
             return {proc:r.processo,parte:r.parte||'',resp:r.responsavel,prazo:r.prazo,vara:r.vara,tipo:r.tipo||'',dias:Math.abs(diasReal),_diff:diasReal};
         });
@@ -682,7 +682,7 @@ function renderTabelaPerf(perf){
     }).join('');
 }
 
-function popularSelectRelatorio(perf){
+function popularSelectRelatório(perf){
     var sel=document.getElementById('select-relatorio-individual'); if(!sel) return;
     var cur=sel.value;
     sel.innerHTML='<option value="">Selecione...</option>';
@@ -711,7 +711,7 @@ function renderChart(perf){
     });
     _chartInstance=new Chart(canvas,{
         type:'bar',
-        data:{labels:labels,datasets:[{label:usarTaxa?'Taxa (%)':'Criticos',data:valores,backgroundColor:cores,borderColor:cores.map(function(c){return c.replace('0.8','1');}),borderWidth:1,borderRadius:5,borderSkipped:false}]},
+        data:{labels:labels,datasets:[{label:usarTaxa?'Taxa (%)':'Críticos',data:valores,backgroundColor:cores,borderColor:cores.map(function(c){return c.replace('0.8','1');}),borderWidth:1,borderRadius:5,borderSkipped:false}]},
         options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
             plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return usarTaxa?ctx.parsed.x.toFixed(1)+'% cumprimento':ctx.parsed.x+' criticos';}}}},
             scales:{x:{min:0,max:maxVal,grid:{color:'rgba(255,255,255,0.05)'},ticks:{color:'#4a607a',font:{size:10},callback:function(v){return usarTaxa?v+'%':v;}}},
@@ -758,7 +758,7 @@ async function popularSelectsResponsaveis(){
         } catch(e){}
     }
     // Popular todos os selects de responsavel
-    ['resp-hoje','resp-proximos','resp-critico'].forEach(function(selId){
+    ['resp-hoje','resp-próximos','resp-critico'].forEach(function(selId){
         var sel=document.getElementById(selId); if(!sel) return;
         var cur=sel.value;
         sel.innerHTML='<option value="">Todos responsaveis</option>';
@@ -793,15 +793,15 @@ function renderPagina(tipo){
     var isHoje=tipo==='hoje';
     var ic=tipo==='critico';
     var dados=isHoje?HOJE_DATA:(ic?PROXIMOS7:VENCIDOS_DATA);
-    var f=ic?filtroState.proximos:filtroState[tipo];
+    var f=ic?filtroState.próximos:filtroState[tipo];
     var fl=filtrarDados(dados,f);
     var tp=Math.max(1,Math.ceil(fl.length/POR_PAG));
     if(pagState[tipo]>tp) pagState[tipo]=tp;
     var ini=(pagState[tipo]-1)*POR_PAG;
     var pg=fl.slice(ini,ini+POR_PAG);
-    var cntEl=document.getElementById(isHoje?'count-hoje':ic?'count-proximos-vencer':'count-vencidos');
+    var cntEl=document.getElementById(isHoje?'count-hoje':ic?'count-próximos-vencer':'count-vencidos');
     if(cntEl) cntEl.textContent=fl.length;
-    var tb=document.getElementById(isHoje?'tbody-hoje':ic?'tbody-proximos-vencer':'tbody-vencidos');
+    var tb=document.getElementById(isHoje?'tbody-hoje':ic?'tbody-próximos-vencer':'tbody-vencidos');
     if(!tb) return;
     if(!pg.length){
         tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Nenhum processo encontrado.</td></tr>';
@@ -866,7 +866,7 @@ function toggleSel(chk){
 }
 
 function selecionarTodos(tipo,checked){
-    var tbId=tipo==='hoje'?'tbody-hoje':'tbody-proximos-vencer';
+    var tbId=tipo==='hoje'?'tbody-hoje':'tbody-próximos-vencer';
     document.querySelectorAll('#'+tbId+' .chk-row').forEach(function(cb){
         cb.checked=checked;
         var proc=cb.getAttribute('data-proc');
@@ -942,7 +942,7 @@ function _wppModal(responsavel,mensagem){
     var box=document.createElement('div');
     box.setAttribute('style','background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:340px;max-width:92vw');
     box.innerHTML='<p style="font-size:15px;font-weight:700;color:var(--text);margin:0 0 6px">WhatsApp nao cadastrado</p>'+
-        '<p style="font-size:12px;color:var(--text3);margin:0 0 14px">Responsavel: +responsavel+'. Cadastre na aba Equipe.</p>'+
+        '<p style="font-size:12px;color:var(--text3);margin:0 0 14px">Responsável: +responsavel+'. Cadastre na aba Equipe.</p>'+
         '<input type="tel" placeholder="5569987654321" style="width:100%;padding:10px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;margin-bottom:14px;box-sizing:border-box;font-family:Inter,sans-serif" id="_wppInp">'+
         '<div style="display:flex;gap:8px">'+
         '<button onclick="var n=document.getElementById(\'_wppInp\').value.replace(/[^0-9]/g,\'\');if(n.length<10){document.getElementById(\'_wppInp\').style.borderColor=\'var(--red)\';return;}if(!_contatosCache)_contatosCache={};_contatosCache[\''+responsavel.toUpperCase()+'\'.toUpperCase()]=n;document.getElementById(\'_wppM\').remove();window.open(\'https://wa.me/\'+n+\'?text=\'+encodeURIComponent(\''+mensagem.replace(/'/g,"\\'").replace(/\n/g,'\\n')+'\'),\'_blank\')" style="flex:1;padding:10px;background:#25d366;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">Abrir WhatsApp</button>'+
@@ -988,8 +988,8 @@ async function alertarHoje(){
     }
     prox();
 }
-async function alertarTodosProximos(){
-    var filtrado=filtrarDados(PROXIMOS7,filtroState.proximos);
+async function alertarTodosPróximos(){
+    var filtrado=filtrarDados(PROXIMOS7,filtroState.próximos);
     if(!filtrado.length){ alert('Nenhum processo encontrado.'); return; }
     if(!confirm('Abrir WhatsApp para os '+filtrado.length+' processos criticos?')) return;
     var contatos=await carregarContatos();
@@ -1111,7 +1111,7 @@ function exportarXlsx(tipo){
     var wb=XLSX.utils.book_new();
     var ws=XLSX.utils.aoa_to_sheet([cab].concat(linhas));
     ws['!cols']=[{wch:24},{wch:40},{wch:16},{wch:12},{wch:10},{wch:36}];
-    XLSX.utils.book_append_sheet(wb,ws,ic?'Criticos 7 dias':'Vencidos');
+    XLSX.utils.book_append_sheet(wb,ws,ic?'Críticos 7 dias':'Vencidos');
     XLSX.writeFile(wb,(ic?'criticos_7dias':'vencidos')+'_'+new Date().toLocaleDateString('pt-BR').replace(/\//g,'-')+'.xlsx');
 }
 
@@ -1164,7 +1164,7 @@ function equipe_editar(id){
         var t=document.getElementById('equipe-form-titulo'); if(t) t.textContent='Editar Membro';
         var b=document.getElementById('equipe-btn-cancelar'); if(b) b.style.display='inline-flex';
         document.getElementById('eq-nome').scrollIntoView({behavior:'smooth'});
-    } catch(e){ alert('Erro ao editar: '+e.message); }
+    } catch(e){ alert('Erro ao editar: '+e.mêssage); }
 }
 
 function equipe_excluir(id,nome){
@@ -1209,7 +1209,7 @@ async function equipe_salvar(){
         var res=await fetch(url,{method:method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         var json=await res.json();
         if(json.success) savedViaAPI=true;
-    } catch(e){ console.warn('API indisponivel:',e.message); }
+    } catch(e){ console.warn('API indisponivel:',e.mêssage); }
     try{
         var lista=JSON.parse(localStorage.getItem('pgm_equipe_v1')||'[]');
         var membro=Object.assign({id:Date.now()},body);
@@ -1241,16 +1241,16 @@ function equipe_cancelarEdicao(){
 function initFiltros(){
     var dataCritico=document.getElementById('data-critico');
     if(dataCritico) dataCritico.addEventListener('change',function(){ filtroState.critico.data=this.value; pagState.critico=1; renderPagina('critico'); });
-    var dataProximos=document.getElementById('data-proximos');
-    if(dataProximos) dataProximos.addEventListener('change',function(){ filtroState.proximos.data=this.value; pagState.critico=1; renderPagina('critico'); });
-    [['filtro-hoje','resp-hoje','hoje'],['filtro-critico','resp-critico','critico'],['filtro-proximos','resp-proximos','proximos'],['filtro-vencido','resp-critico','vencido']].forEach(function(g){
+    var dataPróximos=document.getElementById('data-próximos');
+    if(dataPróximos) dataPróximos.addEventListener('change',function(){ filtroState.próximos.data=this.value; pagState.critico=1; renderPagina('critico'); });
+    [['filtro-hoje','resp-hoje','hoje'],['filtro-critico','resp-critico','critico'],['filtro-próximos','resp-próximos','próximos'],['filtro-vencido','resp-critico','vencido']].forEach(function(g){
         var ft=document.getElementById(g[0]),rs=document.getElementById(g[1]),t=g[2];
         if(ft) ft.addEventListener('input',function(){
-            if(t==='proximos'){ filtroState.proximos.texto=this.value; pagState.critico=1; renderPagina('critico'); }
+            if(t==='próximos'){ filtroState.próximos.texto=this.value; pagState.critico=1; renderPagina('critico'); }
             else { filtroState[t].texto=this.value; pagState[t]=1; renderPagina(t); }
         });
         if(rs) rs.addEventListener('change',function(){
-            if(t==='proximos'){ filtroState.proximos.resp=this.value; pagState.critico=1; renderPagina('critico'); }
+            if(t==='próximos'){ filtroState.próximos.resp=this.value; pagState.critico=1; renderPagina('critico'); }
             else { filtroState[t].resp=this.value; pagState[t]=1; renderPagina(t); }
         });
     });
@@ -1373,7 +1373,7 @@ async function generateReport(type){
         var statsKpis={
             total:document.getElementById('kpi-total')?.textContent||'0',
             vencidos:document.getElementById('kpi-vencidos')?.textContent||VENCIDOS_DATA.length,
-            proximos:document.getElementById('kpi-proximos')?.textContent||PROXIMOS7.length,
+            próximos:document.getElementById('kpi-próximos')?.textContent||PROXIMOS7.length,
             cumpridos:document.getElementById('kpi-cumpridos')?.textContent||'0',
             taxa:(document.getElementById('kpi-taxa-label')?.textContent||'0%').replace(' de taxa','')
         };
@@ -1390,7 +1390,7 @@ async function generateReport(type){
                 ['Total de Processos',statsKpis.total],
                 ['Processos Cumpridos',statsKpis.cumpridos],
                 ['Processos Vencidos',statsKpis.vencidos],
-                ['Proximos a Vencer',statsKpis.proximos],
+                ['Próximos a Vencer',statsKpis.próximos],
                 ['Taxa de Cumprimento',statsKpis.taxa]
             ];
             
@@ -1431,7 +1431,7 @@ async function generateReport(type){
                 
                 pdf.autoTable({
                     startY:y,
-                    head:[['Processo','Parte','Tipo de Peticao','Responsavel','Vara','Prazo','Dias']],
+                    head:[['Processo','Parte','Tipo de Petição','Responsável','Vara','Prazo','Dias']],
                     body:PROXIMOS7.map(function(r){
                         var d=r.dias||0;
                         return [
@@ -1483,7 +1483,7 @@ async function generateReport(type){
                 
                 pdf.autoTable({
                     startY:y,
-                    head:[['Processo','Parte','Tipo de Peticao','Responsavel','Vara','Prazo','Dias Vencido']],
+                    head:[['Processo','Parte','Tipo de Petição','Responsável','Vara','Prazo','Dias Vencido']],
                     body:VENCIDOS_DATA.map(function(r){
                         return [
                             r.proc||'',
@@ -1554,7 +1554,7 @@ async function generateReport(type){
             pdf.setFontSize(12);
             pdf.setFont('helvetica','bold');
             pdf.setTextColor(26,90,108);
-            pdf.text('Responsavel: +resp,margin,y);
+            pdf.text('Responsável: +resp,margin,y);
             y+=10;
             
             // Indicadores
@@ -1564,7 +1564,7 @@ async function generateReport(type){
                 {label:'Total',value:perfDados.total},
                 {label:'Cumpridos',value:perfDados.cumpridos},
                 {label:'Taxa',value:(perfDados.taxa||0).toFixed(1)+'%'},
-                {label:'Criticos',value:perfDados.criticos}
+                {label:'Críticos',value:perfDados.criticos}
             ];
             
             var indColW=(pageW-margin*2-9)/4;
@@ -1598,7 +1598,7 @@ async function generateReport(type){
                 
                 pdf.autoTable({
                     startY:y,
-                    head:[['Processo','Parte','Tipo de Peticao','Vara','Prazo']],
+                    head:[['Processo','Parte','Tipo de Petição','Vara','Prazo']],
                     body:meusCumpridos.map(function(r){
                         return [r.processo||'',r.parte||'',r.tipo||'',r.vara||'',r.prazo||''];
                     }),
@@ -1620,7 +1620,7 @@ async function generateReport(type){
                 
                 pdf.autoTable({
                     startY:y,
-                    head:[['Processo','Parte','Tipo de Peticao','Vara','Prazo','Dias']],
+                    head:[['Processo','Parte','Tipo de Petição','Vara','Prazo','Dias']],
                     body:meusP.map(function(r){
                         return [r.proc||'',r.parte||'',r.tipo||'',r.vara||'',r.prazo||'',r.dias+'d'];
                     }),
@@ -1642,7 +1642,7 @@ async function generateReport(type){
                 
                 pdf.autoTable({
                     startY:y,
-                    head:[['Processo','Parte','Tipo de Peticao','Vara','Prazo','Dias']],
+                    head:[['Processo','Parte','Tipo de Petição','Vara','Prazo','Dias']],
                     body:meusV.map(function(r){
                         return [r.proc||'',r.parte||'',r.tipo||'',r.vara||'',r.prazo||'',r.dias+'d'];
                     }),
@@ -1664,7 +1664,7 @@ async function generateReport(type){
                 
                 pdf.autoTable({
                     startY:y,
-                    head:[['Processo','Parte','Tipo de Peticao','Responsavel','Vara','Prazo','Dias']],
+                    head:[['Processo','Parte','Tipo de Petição','Responsável','Vara','Prazo','Dias']],
                     body:PROXIMOS7.map(function(r){
                         var d=r.dias||0;
                         return [r.proc||'',(r.parte||'').substring(0,30),r.tipo||'',(r.resp||'').substring(0,15),r.vara||'',r.prazo||'',d===0?'Hoje':d+'d'];
@@ -1687,7 +1687,7 @@ async function generateReport(type){
                 
                 pdf.autoTable({
                     startY:y,
-                    head:[['Processo','Parte','Tipo de Peticao','Responsavel','Vara','Prazo','Dias']],
+                    head:[['Processo','Parte','Tipo de Petição','Responsável','Vara','Prazo','Dias']],
                     body:VENCIDOS_DATA.map(function(r){
                         return [r.proc||'',(r.parte||'').substring(0,30),r.tipo||'',(r.resp||'').substring(0,15),r.vara||'',r.prazo||'',r.dias+'d'];
                     }),
@@ -1711,7 +1711,7 @@ async function generateReport(type){
         pdf.save('PGM_'+type+'_'+hoje.replace(/\//g,'-')+'.pdf');
     } catch(err){
         console.error(err);
-        alert('Erro ao gerar PDF: '+err.message);
+        alert('Erro ao gerar PDF: '+err.mêssage);
     } finally {
         overlay.classList.remove('show');
     }
