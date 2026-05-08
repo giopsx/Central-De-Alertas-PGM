@@ -1273,14 +1273,16 @@ function initTabelaEvents(){
 function switchTab(e,n){
     document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
     document.querySelectorAll('.ni').forEach(function(b){b.classList.remove('active');});
-    document.getElementById(n).classList.add('active');
+    var tabEl=document.getElementById('tab-'+n);
+    if(tabEl) tabEl.classList.add('active');
     if(e&&e.currentTarget) e.currentTarget.classList.add('active');
     if(n==='equipe') equipe_renderizar();
 }
 
 function switchTabByName(n){
     document.querySelectorAll('.tab-content').forEach(function(t){t.classList.remove('active');});
-    document.getElementById(n).classList.add('active');
+    var tabEl=document.getElementById('tab-'+n);
+    if(tabEl) tabEl.classList.add('active');
     if(n==='equipe') equipe_renderizar();
 }
 
@@ -1426,7 +1428,7 @@ async function generateReport(type){
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica','bold');
                 pdf.setTextColor(26,90,108);
-                pdf.text(PROCESSOS PROXIMOS A VENCER ('+PROXIMOS7.length+')',margin,y);
+                pdf.text('PROCESSOS PROXIMOS A VENCER ('+PROXIMOS7.length+')',margin,y);
                 y+=6;
                 
                 pdf.autoTable({
