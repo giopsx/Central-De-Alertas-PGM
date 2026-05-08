@@ -140,6 +140,7 @@ def _parse_xlsx(file_obj, inativos=None):
     i_proc  = col_idx.get('Nº DO PROCESSO', col_idx.get('N° DO PROCESSO', col_idx.get('PROCESSO', 4)))
     i_parte = col_idx.get('PARTE ATIVA', col_idx.get('PARTE', 5))
     i_vara  = col_idx.get('VARA', 6)
+    i_tipo  = col_idx.get('TIPO DE PETIÇÃO', col_idx.get('TIPO PETIÇÃO', 7))
     i_cumpr = col_idx.get('CUMPRIDO?', col_idx.get('CUMPRIDO', 13))
 
     cumpridos_lista = []
@@ -154,6 +155,7 @@ def _parse_xlsx(file_obj, inativos=None):
         proc  = str(row[i_proc]).strip() if len(row) > i_proc and row[i_proc] else ''
         parte = str(row[i_parte]).strip()[:60] if len(row) > i_parte and row[i_parte] else ''
         vara  = str(row[i_vara]).strip() if len(row) > i_vara and row[i_vara] else ''
+        tipo  = str(row[i_tipo]).strip() if len(row) > i_tipo and row[i_tipo] else ''
 
         cumpr_raw = row[i_cumpr] if len(row) > i_cumpr else None
         cumpr_val = str(cumpr_raw).strip().upper() if cumpr_raw is not None else ''
@@ -178,7 +180,7 @@ def _parse_xlsx(file_obj, inativos=None):
             cumpr += 1
             cumpridos_lista.append({
                 'processo': proc, 'parte': parte,
-                'responsavel': resp, 'prazo': prazo_str, 'vara': vara
+                'responsavel': resp, 'prazo': prazo_str, 'vara': vara, 'tipo': tipo
             })
 
         diff = (prazo_d - today).days
@@ -187,7 +189,7 @@ def _parse_xlsx(file_obj, inativos=None):
         if not ja_cumprido:
             entry = {
                 'processo': proc, 'parte': parte, 'responsavel': resp,
-                'prazo': prazo_str, 'dias': abs(int(diff)), 'vara': vara
+                'prazo': prazo_str, 'dias': abs(int(diff)), 'vara': vara, 'tipo': tipo
             }
             if diff < 0:
                 venc_nc += 1
@@ -209,37 +211,48 @@ def _parse_xlsx(file_obj, inativos=None):
             perf[resp]['criticos'] += 1
 
     taxa = round(cumpr / total * 100, 1) if total > 0 else 0
-    perf_lista = [
-        {**v, 'responsavel': k, 'taxa': round(v['cumpridos']/v['total']*100, 1) if v['total'] > 0 else 0}
-        for k, v in perf.items()
-    ]
-    perf_lista.sort(key=lambda x: x['taxa'])
+
+    # Filtrar inativos da performance
+    inativos_upper = set(n.upper() for n in (inativos or []))
+
+    perf_list = []
+    for r2, d in sorted(perf.items()):
+        if not _eh_pessoa(r2): continue
+        if r2.upper() in inativos_upper: continue
+        t, c = d['total'], d['cumpridos']
+        perf_list.append({
+            'responsavel': r2, 'total': t, 'cumpridos': c,
+            'taxa': round(c / t * 100, 1) if t > 0 else 0,
+            'criticos': d['criticos']
+        })
+    perf_list.sort(key=lambda x: x['taxa'], reverse=True)
+    prox.sort(key=lambda x: x['dias'])
+    venc.sort(key=lambda x: x['dias'], reverse=True)
 
     return {
         'stats': {
-            'total': total,
-            'cumpridos': cumpr,
-            'vencidos': venc_nc,
-            'proximos': prox_count,
-            'taxa': taxa
+            'total': total, 'vencidos': venc_nc, 'proximos': prox_count,
+            'cumpridos': cumpr, 'taxa': taxa,
+            'ultima_atualizacao': today.strftime('%d/%m/%Y')
         },
-        'vencidos': venc,
+        'performance': perf_list,
         'proximos': prox,
+        'vencidos': venc,
         'cumpridos_lista': cumpridos_lista,
-        'performance': perf_lista,
         'manuais': manuais,
     }
 
-# Auth: token obrigatorio em todas as rotas
+# Auth
 def token_required(f):
     @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = request.args.get('token', request.headers.get('Authorization', ''))
-        if not token: return jsonify({'error': 'Token obrigatorio'}), 401
-        if token != current_app.config.get('ACCESS_TOKEN', 'pgm-contenciosa-2026'):
-            return jsonify({'error': 'Token invalido'}), 403
+    def decorated(*args, **kwargs):
+        token = (request.args.get('token') or
+                 request.cookies.get('token') or
+                 request.headers.get('Authorization', '').replace('Bearer ', ''))
+        if not token or token != current_app.config['ACCESS_TOKEN']:
+            return jsonify({'error': 'Token invalido'}), 401
         return f(*args, **kwargs)
-    return decorated_function
+    return decorated
 
 # Rotas
 @bp.route('/')
