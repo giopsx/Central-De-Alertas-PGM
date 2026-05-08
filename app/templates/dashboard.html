@@ -323,7 +323,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     <div class="kc amber" style="cursor:pointer" onclick="switchTabByName('criticos')">
       <div class="kc-glow"></div>
       <div class="kc-top"><span class="kc-lbl">Próximos 7 dias</span><div class="kc-ico"><svg viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div></div>
-      <div class="kc-val" id="kpi-próximos">0</div>
+      <div class="kc-val" id="kpi-proximos">0</div>
       <div class="kc-sub" style="color:var(--amber);font-weight:600">Atenção urgente</div>
       <div class="kc-bar"></div>
     </div>
@@ -414,13 +414,13 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
   <div class="alert aa" style="justify-content:space-between">
     <span style="display:flex;align-items:center;gap:8px">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-      <strong><span id="count-próximos-vencer">0</span> processos</strong> vencem nos próximos 7 dias
+      <strong><span id="count-proximos-vencer">0</span> processos</strong> vencem nos próximos 7 dias
     </span>
     <button class="btn btn-amber" onclick="alertarTodosProximos()">Alertar Todos</button>
   </div>
   <div class="fb">
     <div class="sw"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="filtro-próximos" type="text" placeholder="Buscar processo, responsavel ou parte..."></div>
-    <select id="resp-próximos" class="fsel"><option value="">Todos responsaveis</option></select>
+    <select id="resp-proximos" class="fsel"><option value="">Todos responsaveis</option></select>
     <div style="display:flex;align-items:center;gap:6px">
       <label style="font-size:12px;color:var(--text2);white-space:nowrap">Prazo:</label>
       <input id="data-proximos" type="date" class="fsel" style="padding:7px 10px;cursor:pointer">
@@ -437,7 +437,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
   </div>
   <div class="tw"><table>
     <thead><tr><th style="width:36px"></th><th>Processo</th><th>Parte</th><th>Responsável</th><th>Prazo</th><th>Vence em</th><th>Vara</th><th>Ações</th></tr></thead>
-    <tbody id="tbody-próximos-vencer"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
+    <tbody id="tbody-proximos-vencer"><tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Carregando...</td></tr></tbody>
   </table></div>
   <div class="pbar" id="pag-criticos"></div>
 </div>
@@ -630,7 +630,7 @@ function renderDashboard(data){
 
 function atualizarBadges(){
     var nh=document.getElementById('nb-hoje'),nc=document.getElementById('nb-c'),nv=document.getElementById('nb-v');
-    var eh=document.getElementById('kpi-hoje'),ep=document.getElementById('kpi-próximos');
+    var eh=document.getElementById('kpi-hoje'),ep=document.getElementById('kpi-proximos');
     if(nh) nh.textContent=HOJE_DATA.length;
     if(nc) nc.textContent=PROXIMOS7.length;
     if(nv) nv.textContent=VENCIDOS_DATA.length;
@@ -1373,7 +1373,7 @@ async function generateReport(type){
         var statsKpis={
             total:document.getElementById('kpi-total')?.textContent||'0',
             vencidos:document.getElementById('kpi-vencidos')?.textContent||VENCIDOS_DATA.length,
-            próximos:document.getElementById('kpi-próximos')?.textContent||PROXIMOS7.length,
+            próximos:document.getElementById('kpi-proximos')?.textContent||PROXIMOS7.length,
             cumpridos:document.getElementById('kpi-cumpridos')?.textContent||'0',
             taxa:(document.getElementById('kpi-taxa-label')?.textContent||'0%').replace(' de taxa','')
         };
