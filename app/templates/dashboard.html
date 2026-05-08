@@ -423,8 +423,8 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     <select id="resp-próximos" class="fsel"><option value="">Todos responsaveis</option></select>
     <div style="display:flex;align-items:center;gap:6px">
       <label style="font-size:12px;color:var(--text2);white-space:nowrap">Prazo:</label>
-      <input id="data-próximos" type="date" class="fsel" style="padding:7px 10px;cursor:pointer">
-      <button onclick="document.getElementById('data-próximos').value='';filtroState.próximos.data='';pagState.critico=1;renderPagina('critico')" style="padding:6px 8px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-size:11px">✕</button>
+      <input id="data-proximos" type="date" class="fsel" style="padding:7px 10px;cursor:pointer">
+      <button onclick="document.getElementById('data-proximos').value='';filtroState.proximos.data='';pagState.critico=1;renderPagina('critico')" style="padding:6px 8px;background:none;border:1px solid var(--border);border-radius:6px;color:var(--text2);cursor:pointer;font-size:11px">✕</button>
     </div>
     <button onclick="exportarXlsx('critico')" class="xbtn"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Excel</button>
   </div>
@@ -591,7 +591,7 @@ async function loadDashboard(){
             apiOk=true;
             try{ localStorage.setItem('pgm_dash_cache',JSON.stringify(dashData)); }catch(e){}
         }
-        if(critData) renderCríticos(critData);
+        if(critData) renderCriticos(critData);
         popularSelectsResponsaveis();
     } catch(e){ console.warn('API indisponivel:',e.mêssage); }
     if(!apiOk){
@@ -606,7 +606,7 @@ async function loadDashboard(){
 function renderDashboard(data){
     if(data&&!data.sem_dados&&data.stats){
         var kpis=data.stats;
-        ['total','vencidos','próximos','cumpridos'].forEach(function(k){
+        ['total','vencidos','proximos','cumpridos'].forEach(function(k){
             var el=document.getElementById('kpi-'+k); if(el) el.textContent=kpis[k]||0;
         });
         var tx=document.getElementById('kpi-taxa-label');
@@ -617,7 +617,7 @@ function renderDashboard(data){
             if(hh) hh.innerHTML='<li style="font-size:13px;color:var(--text)"><strong>'+data.filename+'</strong></li>';
         }
     } else {
-        ['total','vencidos','próximos','cumpridos'].forEach(function(k){
+        ['total','vencidos','proximos','cumpridos'].forEach(function(k){
             var el=document.getElementById('kpi-'+k); if(el) el.textContent='—';
         });
         var tx2=document.getElementById('kpi-taxa-label');
@@ -650,7 +650,7 @@ function calcDias(prazoStr){
     } catch(e){ return 0; }
 }
 
-function renderCríticos(data){
+function renderCriticos(data){
     if(data&&data.próximos){
         var todos=data.próximos.map(function(r){
             var diasReal=calcDias(r.prazo);
@@ -793,7 +793,7 @@ function renderPagina(tipo){
     var isHoje=tipo==='hoje';
     var ic=tipo==='critico';
     var dados=isHoje?HOJE_DATA:(ic?PROXIMOS7:VENCIDOS_DATA);
-    var f=ic?filtroState.próximos:filtroState[tipo];
+    var f=ic?filtroState.proximos:filtroState[tipo];
     var fl=filtrarDados(dados,f);
     var tp=Math.max(1,Math.ceil(fl.length/POR_PAG));
     if(pagState[tipo]>tp) pagState[tipo]=tp;
@@ -989,7 +989,7 @@ async function alertarHoje(){
     prox();
 }
 async function alertarTodosProximos(){
-    var filtrado=filtrarDados(PROXIMOS7,filtroState.próximos);
+    var filtrado=filtrarDados(PROXIMOS7,filtroState.proximos);
     if(!filtrado.length){ alert('Nenhum processo encontrado.'); return; }
     if(!confirm('Abrir WhatsApp para os '+filtrado.length+' processos criticos?')) return;
     var contatos=await carregarContatos();
@@ -1241,16 +1241,16 @@ function equipe_cancelarEdicao(){
 function initFiltros(){
     var dataCritico=document.getElementById('data-critico');
     if(dataCritico) dataCritico.addEventListener('change',function(){ filtroState.critico.data=this.value; pagState.critico=1; renderPagina('critico'); });
-    var dataPróximos=document.getElementById('data-próximos');
-    if(dataPróximos) dataPróximos.addEventListener('change',function(){ filtroState.próximos.data=this.value; pagState.critico=1; renderPagina('critico'); });
-    [['filtro-hoje','resp-hoje','hoje'],['filtro-critico','resp-critico','critico'],['filtro-próximos','resp-próximos','próximos'],['filtro-vencido','resp-critico','vencido']].forEach(function(g){
+    var dataPróximos=document.getElementById('data-proximos');
+    if(dataPróximos) dataPróximos.addEventListener('change',function(){ filtroState.proximos.data=this.value; pagState.critico=1; renderPagina('critico'); });
+    [['filtro-hoje','resp-hoje','hoje'],['filtro-critico','resp-critico','critico'],['filtro-próximos','resp-próximos','proximos'],['filtro-vencido','resp-critico','vencido']].forEach(function(g){
         var ft=document.getElementById(g[0]),rs=document.getElementById(g[1]),t=g[2];
         if(ft) ft.addEventListener('input',function(){
-            if(t==='próximos'){ filtroState.próximos.texto=this.value; pagState.critico=1; renderPagina('critico'); }
+            if(t==='proximos'){ filtroState.proximos.texto=this.value; pagState.critico=1; renderPagina('critico'); }
             else { filtroState[t].texto=this.value; pagState[t]=1; renderPagina(t); }
         });
         if(rs) rs.addEventListener('change',function(){
-            if(t==='próximos'){ filtroState.próximos.resp=this.value; pagState.critico=1; renderPagina('critico'); }
+            if(t==='proximos'){ filtroState.proximos.resp=this.value; pagState.critico=1; renderPagina('critico'); }
             else { filtroState[t].resp=this.value; pagState[t]=1; renderPagina(t); }
         });
     });
