@@ -169,6 +169,7 @@ def _parse_xlsx(file_obj, inativos=None):
         prazo_str = prazo_d.strftime('%d/%m/%Y')
 
         # Se a planilha nao marca como cumprido, remove do manuais (permite "desmarcar")
+        # PREJUDICADO = CUMPRIDO (nao deve aparecer em nenhuma aba de alertas)
         if proc in manuais and cumpr_val not in ('SIM', 'PARCIAL', 'PREJUDICADO'):
             manuais.remove(proc)
         ja_cumprido = cumpr_val in ('SIM', 'PARCIAL', 'PREJUDICADO') or proc in manuais
@@ -208,48 +209,37 @@ def _parse_xlsx(file_obj, inativos=None):
             perf[resp]['criticos'] += 1
 
     taxa = round(cumpr / total * 100, 1) if total > 0 else 0
-
-    # Filtrar inativos da performance
-    inativos_upper = set(n.upper() for n in (inativos or []))
-
-    perf_list = []
-    for r2, d in sorted(perf.items()):
-        if not _eh_pessoa(r2): continue
-        if r2.upper() in inativos_upper: continue
-        t, c = d['total'], d['cumpridos']
-        perf_list.append({
-            'responsavel': r2, 'total': t, 'cumpridos': c,
-            'taxa': round(c / t * 100, 1) if t > 0 else 0,
-            'criticos': d['criticos']
-        })
-    perf_list.sort(key=lambda x: x['taxa'], reverse=True)
-    prox.sort(key=lambda x: x['dias'])
-    venc.sort(key=lambda x: x['dias'], reverse=True)
+    perf_lista = [
+        {**v, 'responsavel': k, 'taxa': round(v['cumpridos']/v['total']*100, 1) if v['total'] > 0 else 0}
+        for k, v in perf.items()
+    ]
+    perf_lista.sort(key=lambda x: x['taxa'])
 
     return {
         'stats': {
-            'total': total, 'vencidos': venc_nc, 'proximos': prox_count,
-            'cumpridos': cumpr, 'taxa': taxa,
-            'ultima_atualizacao': today.strftime('%d/%m/%Y')
+            'total': total,
+            'cumpridos': cumpr,
+            'vencidos': venc_nc,
+            'proximos': prox_count,
+            'taxa': taxa
         },
-        'performance': perf_list,
-        'proximos': prox,
         'vencidos': venc,
+        'proximos': prox,
         'cumpridos_lista': cumpridos_lista,
+        'performance': perf_lista,
         'manuais': manuais,
     }
 
-# Auth
+# Auth: token obrigatorio em todas as rotas
 def token_required(f):
     @wraps(f)
-    def decorated(*args, **kwargs):
-        token = (request.args.get('token') or
-                 request.cookies.get('token') or
-                 request.headers.get('Authorization', '').replace('Bearer ', ''))
-        if not token or token != current_app.config['ACCESS_TOKEN']:
-            return jsonify({'error': 'Token invalido'}), 401
+    def decorated_function(*args, **kwargs):
+        token = request.args.get('token', request.headers.get('Authorization', ''))
+        if not token: return jsonify({'error': 'Token obrigatorio'}), 401
+        if token != current_app.config.get('ACCESS_TOKEN', 'pgm-contenciosa-2026'):
+            return jsonify({'error': 'Token invalido'}), 403
         return f(*args, **kwargs)
-    return decorated
+    return decorated_function
 
 # Rotas
 @bp.route('/')
