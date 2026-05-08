@@ -53,7 +53,7 @@ def _sb_delete(table, key, val):
         print(f'[SB DELETE] {e}')
         return False
 
-# Cache: Supabase dados_cache + fallback memoria
+# Cache
 _mem = {}
 
 def cache_get(chave):
@@ -70,7 +70,6 @@ def cache_set(chave, valor):
     _mem[chave] = valor
     try:
         h = _sb_headers()
-        # Tenta UPDATE primeiro
         r = http.patch(
             f'{SUPABASE_URL}/rest/v1/dados_cache?chave=eq.{chave}',
             headers=h,
@@ -79,7 +78,6 @@ def cache_set(chave, valor):
         )
         if r.ok and r.text.strip() not in ('', '[]', 'null'):
             return
-        # Se nao atualizou nenhuma linha, faz INSERT
         h2 = {**h, 'Prefer': 'return=minimal'}
         r2 = http.post(
             f'{SUPABASE_URL}/rest/v1/dados_cache',
@@ -92,169 +90,18 @@ def cache_set(chave, valor):
     except Exception as e:
         print(f'[CACHE SET] {chave}: {e}')
 
-# Parse xlsx
-_NAO_PESSOAS = {
-    'SPF','SPJ','SPMA','GEC','AMBIENTAL','FISCAL','VERIFICAR','-',
-    'SEM RESPONSAVEL','GABINETE ACOMPANHANDO','CARTORIO/GABINETE','DISTRIBUIR',
-    'MANIFESTACAO DESNECESSARIA','PREJUDICADO','',
-}
-_NAO_PESSOAS_PREFIXOS = ('DEVOLVIDO','ESCRITORIO','GABINETE','F704')
-_NORMALIZAR = {'ERICA':'ERICA','JEFERSON':'JEFFERSON'}
-
-def _norm(nome):
-    return _NORMALIZAR.get(nome.upper(), nome.upper()) if nome else ''
-
-def _eh_pessoa(nome):
-    if not nome: return False
-    if nome.upper() in _NAO_PESSOAS: return False
-    if nome.upper().startswith(_NAO_PESSOAS_PREFIXOS): return False
-    if nome.count('.') >= 3 and nome.count('-') >= 1: return False
-    if any(c.isdigit() for c in nome): return False
-    if '/' in nome or '&' in nome or '\n' in nome: return False
-    return True
-
-def _parse_xlsx(file_obj, inativos=None):
-    import openpyxl, warnings
-    from datetime import timezone, timedelta
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
-        wb = openpyxl.load_workbook(file_obj, read_only=True, data_only=True)
-    # Rondônia é UTC-4
-    tz_ro = timezone(timedelta(hours=-4))
-    today = datetime.now(tz_ro).date()
-    ws = wb['Prazos 2026']
-    perf = {}
-    prox, venc = [], []
-    total = venc_nc = prox_count = cumpr = 0
-    manuais = cache_get('cumpridos_manuais') or []
-
-    # Detectar índices das colunas pelos cabeçalhos
-    header_row = next(ws.iter_rows(min_row=1, max_row=1, values_only=True))
-    col_idx = {}
-    for i, h in enumerate(header_row):
-        if h:
-            col_idx[str(h).strip().upper()] = i
-    # Mapeamento flexível
-    i_prazo = col_idx.get('PRAZO', 1)
-    i_resp  = col_idx.get('RESPONSÁVEL', col_idx.get('RESPONSAVEL', 2))
-    i_proc  = col_idx.get('Nº DO PROCESSO', col_idx.get('N° DO PROCESSO', col_idx.get('PROCESSO', 4)))
-    i_parte = col_idx.get('PARTE ATIVA', col_idx.get('PARTE', 5))
-    i_vara  = col_idx.get('VARA', 6)
-    i_tipo  = col_idx.get('TIPO DE PETIÇÃO', col_idx.get('TIPO PETIÇÃO', 7))
-    i_cumpr = col_idx.get('CUMPRIDO?', col_idx.get('CUMPRIDO', 13))
-
-    cumpridos_lista = []
-    for row in ws.iter_rows(min_row=2, values_only=True):
-        if all(v is None for v in row): continue
-        if len(row) <= i_prazo: continue
-
-        prazo_raw = row[i_prazo]
-        resp_raw = row[i_resp] if len(row) > i_resp else None
-        resp = _norm(''.join(c for c in str(resp_raw).strip() if c.isprintable()).strip() if resp_raw is not None else '')
-        if not resp: resp = 'Sem responsavel'
-        proc  = str(row[i_proc]).strip() if len(row) > i_proc and row[i_proc] else ''
-        parte = str(row[i_parte]).strip()[:60] if len(row) > i_parte and row[i_parte] else ''
-        vara  = str(row[i_vara]).strip() if len(row) > i_vara and row[i_vara] else ''
-        tipo  = str(row[i_tipo]).strip() if len(row) > i_tipo and row[i_tipo] else ''
-
-        cumpr_raw = row[i_cumpr] if len(row) > i_cumpr else None
-        cumpr_val = str(cumpr_raw).strip().upper() if cumpr_raw is not None else ''
-        # Remover caracteres nao-ASCII invisiveis
-        cumpr_val = ''.join(c for c in cumpr_val if c.isprintable()).strip()
-
-        prazo_d = None
-        if isinstance(prazo_raw, datetime): prazo_d = prazo_raw.date()
-        elif isinstance(prazo_raw, date):   prazo_d = prazo_raw
-        if not prazo_d: continue
-
-        total += 1
-        prazo_str = prazo_d.strftime('%d/%m/%Y')
-
-        # Se a planilha nao marca como cumprido, remove do manuais (permite "desmarcar")
-        # PREJUDICADO = CUMPRIDO (nao deve aparecer em nenhuma aba de alertas)
-        if proc in manuais and cumpr_val not in ('SIM', 'PARCIAL', 'PREJUDICADO'):
-            manuais.remove(proc)
-        ja_cumprido = cumpr_val in ('SIM', 'PARCIAL', 'PREJUDICADO') or proc in manuais
-
-        if ja_cumprido:
-            cumpr += 1
-            cumpridos_lista.append({
-                'processo': proc, 'parte': parte,
-                'responsavel': resp, 'prazo': prazo_str, 'vara': vara, 'tipo': tipo
-            })
-
-        diff = (prazo_d - today).days
-
-        # FIX: cada if/elif em linha separada para evitar bug de semicolon
-        if not ja_cumprido:
-            entry = {
-                'processo': proc, 'parte': parte, 'responsavel': resp,
-                'prazo': prazo_str, 'dias': abs(int(diff)), 'vara': vara, 'tipo': tipo
-            }
-            if diff < 0:
-                venc_nc += 1
-                # FIX: so adiciona se for uma pessoa valida (filtra DISTRIBUIR etc)
-                if _eh_pessoa(resp):
-                    venc.append(entry)
-            elif diff <= 7:
-                prox_count += 1
-                # FIX: so adiciona se for uma pessoa valida
-                if _eh_pessoa(resp):
-                    prox.append(entry)
-
-        if resp not in perf:
-            perf[resp] = {'total': 0, 'cumpridos': 0, 'criticos': 0}
-        perf[resp]['total'] += 1
-        if ja_cumprido:
-            perf[resp]['cumpridos'] += 1
-        if not ja_cumprido and diff < 0:
-            perf[resp]['criticos'] += 1
-
-    taxa = round(cumpr / total * 100, 1) if total > 0 else 0
-
-    # Filtrar inativos da performance
-    inativos_upper = set(n.upper() for n in (inativos or []))
-
-    perf_list = []
-    for r2, d in sorted(perf.items()):
-        if not _eh_pessoa(r2): continue
-        if r2.upper() in inativos_upper: continue
-        t, c = d['total'], d['cumpridos']
-        perf_list.append({
-            'responsavel': r2, 'total': t, 'cumpridos': c,
-            'taxa': round(c / t * 100, 1) if t > 0 else 0,
-            'criticos': d['criticos']
-        })
-    perf_list.sort(key=lambda x: x['taxa'], reverse=True)
-    prox.sort(key=lambda x: x['dias'])
-    venc.sort(key=lambda x: x['dias'], reverse=True)
-
-    return {
-        'stats': {
-            'total': total, 'vencidos': venc_nc, 'proximos': prox_count,
-            'cumpridos': cumpr, 'taxa': taxa,
-            'ultima_atualizacao': today.strftime('%d/%m/%Y')
-        },
-        'performance': perf_list,
-        'proximos': prox,
-        'vencidos': venc,
-        'cumpridos_lista': cumpridos_lista,
-        'manuais': manuais,
-    }
-
-# Auth
+# Token decorator
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = (request.args.get('token') or
-                 request.cookies.get('token') or
-                 request.headers.get('Authorization', '').replace('Bearer ', ''))
-        if not token or token != current_app.config['ACCESS_TOKEN']:
-            return jsonify({'error': 'Token invalido'}), 401
+        token = request.args.get('token') or request.headers.get('Authorization', '').replace('Bearer ', '')
+        expected_token = current_app.config.get('ACCESS_TOKEN', 'pgm-contenciosa-2026')
+        if token != expected_token:
+            return jsonify({'error': 'Token inválido'}), 401
         return f(*args, **kwargs)
     return decorated
 
-# Rotas
+# Routes
 @bp.route('/')
 def index():
     from flask import redirect, url_for
@@ -279,57 +126,21 @@ def painel():
     resp.headers['Expires'] = '0'
     return resp
 
-@bp.route('/api/upload', methods=['POST'])
-@token_required
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': 'Arquivo nao fornecido'}), 400
-    file = request.files['file']
-    if not file.filename.lower().endswith('.xlsx'):
-        return jsonify({'error': 'Apenas XLSX'}), 400
-    try:
-        membros_raw = _sb_get('equipe', 'select=nome,ativo')
-        inativos = [m['nome'] for m in membros_raw if isinstance(m, dict) and m.get('ativo') is False]
-        data = _parse_xlsx(file, inativos=inativos)
-        stats_ant = cache_get('stats') or {}
-        diff_info = {}
-        if stats_ant:
-            diff_info = {
-                'vencidos_delta':  data['stats']['vencidos']  - stats_ant.get('vencidos', 0),
-                'cumpridos_delta': data['stats']['cumpridos'] - stats_ant.get('cumpridos', 0),
-                'total_delta':     data['stats']['total']     - stats_ant.get('total', 0),
-            }
-        cache_set('stats',           data['stats'])
-        cache_set('performance',     data['performance'])
-        cache_set('proximos',        data['proximos'])
-        cache_set('vencidos',        data['vencidos'])
-        cache_set('cumpridos_lista', data['cumpridos_lista'])
-        cache_set('cumpridos_manuais', data['manuais'])
-        cache_set('filename',        file.filename)
-        return jsonify({'success': True, 'stats': data['stats'], 'diff': diff_info, 'filename': file.filename})
-    except KeyError as e:
-        return jsonify({'error': f'Aba nao encontrada: {e}. Use "Prazos 2026".'}), 422
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
-
 @bp.route('/api/dashboard')
 @token_required
 def get_dashboard():
-    stats = cache_get('stats') or {}
-    if not stats:
-        stats = {'total': 0, 'vencidos': 0, 'proximos': 0, 'cumpridos': 0, 'taxa': 0}
-    
+    stats = cache_get('stats') or {'total': 0, 'cumpridos': 0, 'vencidos': 0, 'proximos': 0, 'taxa': 0}
     perf = cache_get('performance') or []
     proximos = cache_get('proximos') or []
     vencidos = cache_get('vencidos') or []
+    cumpridos_lista = cache_get('cumpridos_lista') or []
     
     try:
         membros_raw = _sb_get('equipe', 'select=nome,ativo')
         if membros_raw and isinstance(membros_raw, list):
             cadastrados = set(
                 m['nome'].strip().upper() for m in membros_raw
-                if isinstance(m, dict) and m.get('nome')
-                and m.get('ativo') is not False
+                if isinstance(m, dict) and m.get('nome') and m.get('ativo') is not False
             )
             if cadastrados:
                 perf = [p for p in perf if p.get('responsavel', '').strip().upper() in cadastrados]
@@ -345,6 +156,7 @@ def get_dashboard():
         'performance': perf,
         'proximos_lista': proximos,
         'vencidos_lista': vencidos,
+        'cumpridos_lista': cumpridos_lista,
         'filename': cache_get('filename') or ''
     })
 
@@ -354,13 +166,13 @@ def get_criticos():
     from datetime import timezone, timedelta
     tz_ro = timezone(timedelta(hours=-4))
     hoje = datetime.now(tz_ro).date()
-
+    
     todos_proximos = cache_get('proximos') or []
     todos_vencidos = cache_get('vencidos') or []
-
+    
     proximos_atualizados = []
     vencidos_atualizados = []
-
+    
     for p in todos_proximos:
         try:
             prazo_d = datetime.strptime(p['prazo'], '%d/%m/%Y').date()
@@ -373,7 +185,7 @@ def get_criticos():
                 proximos_atualizados.append(entry)
         except Exception:
             proximos_atualizados.append(p)
-
+    
     for v in todos_vencidos:
         try:
             prazo_d = datetime.strptime(v['prazo'], '%d/%m/%Y').date()
@@ -383,15 +195,15 @@ def get_criticos():
             vencidos_atualizados.append(entry)
         except Exception:
             vencidos_atualizados.append(v)
-
+    
     proximos_atualizados.sort(key=lambda x: x['dias'])
     vencidos_atualizados.sort(key=lambda x: x['dias'], reverse=True)
-
+    
     f = request.args.get('responsavel', '').strip().upper()
     if f:
         proximos_atualizados = [p for p in proximos_atualizados if p.get('responsavel', '').upper() == f]
         vencidos_atualizados = [v for v in vencidos_atualizados if v.get('responsavel', '').upper() == f]
-
+    
     return jsonify({'vencidos': vencidos_atualizados, 'proximos': proximos_atualizados})
 
 @bp.route('/api/cumpridos')
@@ -403,71 +215,11 @@ def get_cumpridos():
         lista = [c for c in lista if c.get('responsavel', '').upper() == resp_filtro]
     return jsonify({'cumpridos': lista})
 
-@bp.route('/api/cumprido', methods=['POST'])
-@token_required
-def marcar_cumprido():
-    data = request.get_json()
-    if not data or 'processo' not in data:
-        return jsonify({'error': 'Processo obrigatorio'}), 400
-    proc = data['processo']
-    manuais = cache_get('cumpridos_manuais') or []
-    if proc not in manuais:
-        manuais.append(proc)
-    cache_set('cumpridos_manuais', manuais)
-    vencidos = [v for v in (cache_get('vencidos') or []) if v.get('processo') != proc]
-    proximos = [p for p in (cache_get('proximos') or []) if p.get('processo') != proc]
-    cache_set('vencidos', vencidos)
-    cache_set('proximos', proximos)
-    stats = cache_get('stats') or {}
-    if stats:
-        stats['cumpridos'] = stats.get('cumpridos', 0) + 1
-        stats['vencidos']  = len(vencidos)
-        stats['proximos']  = len(proximos)
-        t = stats.get('total', 1)
-        stats['taxa'] = round(stats['cumpridos'] / t * 100, 1) if t > 0 else 0
-        cache_set('stats', stats)
-    return jsonify({'success': True})
-
-# Equipe via Supabase
 @bp.route('/api/equipe')
 @token_required
 def get_equipe():
     membros = _sb_get('equipe', 'select=id,nome,funcao,email,whatsapp,ativo&order=id.asc')
     return jsonify({'membros': membros if isinstance(membros, list) else []})
-
-@bp.route('/api/equipe', methods=['POST'])
-@token_required
-def add_membro():
-    data = request.get_json()
-    if not data or not data.get('nome'):
-        return jsonify({'error': 'Nome obrigatorio'}), 400
-    result = _sb_post('equipe', {
-        'nome':     data.get('nome', '').strip(),
-        'funcao':   data.get('funcao', ''),
-        'email':    data.get('email', '').strip(),
-        'whatsapp': data.get('whatsapp', '').strip()
-    })
-    if result and isinstance(result, dict) and 'id' in result:
-        return jsonify({'success': True, 'membro': result}), 201
-    return jsonify({'error': 'Falha ao salvar'}), 500
-
-@bp.route('/api/equipe/<int:mid>', methods=['PUT'])
-@token_required
-def update_membro(mid):
-    data = request.get_json()
-    campos = {k: v for k, v in data.items() if k in ('nome', 'funcao', 'email', 'whatsapp', 'ativo')}
-    ok = _sb_patch('equipe', 'id', mid, campos)
-    return jsonify({'success': ok}) if ok else (jsonify({'error': 'Nao encontrado'}), 404)
-
-@bp.route('/api/equipe/<int:mid>', methods=['DELETE'])
-@token_required
-def delete_membro(mid):
-    ok = _sb_delete('equipe', 'id', mid)
-    return jsonify({'success': ok}) if ok else (jsonify({'error': 'Nao encontrado'}), 404)
-
-@bp.route('/robots.txt')
-def robots():
-    return 'User-agent: *\nDisallow: /', 200, {'Content-Type': 'text/plain'}
 
 @bp.after_request
 def security(response):
