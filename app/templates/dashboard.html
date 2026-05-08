@@ -942,7 +942,7 @@ function _wppModal(responsavel,mensagem){
     var box=document.createElement('div');
     box.setAttribute('style','background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:28px;width:340px;max-width:92vw');
     box.innerHTML='<p style="font-size:15px;font-weight:700;color:var(--text);margin:0 0 6px">WhatsApp nao cadastrado</p>'+
-        '<p style="font-size:12px;color:var(--text3);margin:0 0 14px">Responsavel: '+responsavel+'. Cadastre na aba Equipe.</p>'+
+        '<p style="font-size:12px;color:var(--text3);margin:0 0 14px">Responsavel: +responsavel+'. Cadastre na aba Equipe.</p>'+
         '<input type="tel" placeholder="5569987654321" style="width:100%;padding:10px;border:1px solid var(--border2);border-radius:8px;background:var(--surface2);color:var(--text);font-size:14px;margin-bottom:14px;box-sizing:border-box;font-family:Inter,sans-serif" id="_wppInp">'+
         '<div style="display:flex;gap:8px">'+
         '<button onclick="var n=document.getElementById(\'_wppInp\').value.replace(/[^0-9]/g,\'\');if(n.length<10){document.getElementById(\'_wppInp\').style.borderColor=\'var(--red)\';return;}if(!_contatosCache)_contatosCache={};_contatosCache[\''+responsavel.toUpperCase()+'\'.toUpperCase()]=n;document.getElementById(\'_wppM\').remove();window.open(\'https://wa.me/\'+n+\'?text=\'+encodeURIComponent(\''+mensagem.replace(/'/g,"\\'").replace(/\n/g,'\\n')+'\'),\'_blank\')" style="flex:1;padding:10px;background:#25d366;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer">Abrir WhatsApp</button>'+
@@ -1353,8 +1353,7 @@ async function generateReport(type){
             
             pdf.setFontSize(8);
             pdf.setTextColor(120,120,120);
-            pdf.text('Data: '+hoje,margin,37);
-            pdf.text('Pagina 1',pageW-margin-20,37);
+            pdf.text('Data: '+hoje,pageW-margin-30,37);
             
             return 40;
         }
@@ -1427,7 +1426,7 @@ async function generateReport(type){
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica','bold');
                 pdf.setTextColor(26,90,108);
-                pdf.text('PROCESSOS PROXIMOS A VENCER ('+PROXIMOS7.length+')',margin,y);
+                pdf.text(PROCESSOS PROXIMOS A VENCER ('+PROXIMOS7.length+')',margin,y);
                 y+=6;
                 
                 pdf.autoTable({
@@ -1479,7 +1478,7 @@ async function generateReport(type){
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica','bold');
                 pdf.setTextColor(26,90,108);
-                pdf.text('PROCESSOS VENCIDOS ('+VENCIDOS_DATA.length+')',margin,y);
+                pdf.text(PROCESSOS VENCIDOS ('+VENCIDOS_DATA.length+')',margin,y);
                 y+=6;
                 
                 pdf.autoTable({
@@ -1555,7 +1554,7 @@ async function generateReport(type){
             pdf.setFontSize(12);
             pdf.setFont('helvetica','bold');
             pdf.setTextColor(26,90,108);
-            pdf.text('Responsavel: '+resp,margin,y);
+            pdf.text('Responsavel: +resp,margin,y);
             y+=10;
             
             // Indicadores
@@ -1638,7 +1637,7 @@ async function generateReport(type){
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica','bold');
                 pdf.setTextColor(26,90,108);
-                pdf.text('PROCESSOS VENCIDOS ('+meusV.length+')',margin,y);
+                pdf.text(PROCESSOS VENCIDOS ('+meusV.length+')',margin,y);
                 y+=5;
                 
                 pdf.autoTable({
@@ -1683,7 +1682,7 @@ async function generateReport(type){
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica','bold');
                 pdf.setTextColor(26,90,108);
-                pdf.text('PROCESSOS VENCIDOS ('+VENCIDOS_DATA.length+')',margin,y);
+                pdf.text(PROCESSOS VENCIDOS ('+VENCIDOS_DATA.length+')',margin,y);
                 y+=6;
                 
                 pdf.autoTable({
