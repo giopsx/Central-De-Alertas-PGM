@@ -570,7 +570,7 @@ async function importarPlanilha(){
             alert('Erro ao importar: '+(json.error||'Falha desconhecida'));
         }
     } catch(err){
-        alert('Erro de rede: '+err.mêssage);
+        alert('Erro de rede: '+err.message);
     } finally {
         btn.textContent='Importar Planilha';
         btn.disabled=false;
