@@ -315,10 +315,14 @@ def upload_file():
 @bp.route('/api/dashboard')
 @token_required
 def get_dashboard():
-    stats = cache_get('stats')
+    stats = cache_get('stats') or {}
     if not stats:
-        return jsonify({'sem_dados': True})
+        stats = {'total': 0, 'vencidos': 0, 'proximos': 0, 'cumpridos': 0, 'taxa': 0}
+    
     perf = cache_get('performance') or []
+    proximos = cache_get('proximos') or []
+    vencidos = cache_get('vencidos') or []
+    
     try:
         membros_raw = _sb_get('equipe', 'select=nome,ativo')
         if membros_raw and isinstance(membros_raw, list):
@@ -331,7 +335,18 @@ def get_dashboard():
                 perf = [p for p in perf if p.get('responsavel', '').strip().upper() in cadastrados]
     except Exception as e:
         print(f'[WARN] filtro equipe falhou: {e}')
-    return jsonify({'stats': stats, 'performance': perf, 'filename': cache_get('filename') or ''})
+    
+    return jsonify({
+        'total': stats.get('total', 0),
+        'cumpridos': stats.get('cumpridos', 0),
+        'vencidos': len(vencidos),
+        'proximos': len(proximos),
+        'taxa': stats.get('taxa', 0),
+        'performance': perf,
+        'proximos_lista': proximos,
+        'vencidos_lista': vencidos,
+        'filename': cache_get('filename') or ''
+    })
 
 @bp.route('/api/criticos')
 @token_required
