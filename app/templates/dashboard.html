@@ -1478,7 +1478,7 @@ async function generateReport(type){
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica','bold');
                 pdf.setTextColor(26,90,108);
-                pdf.text(PROCESSOS VENCIDOS ('+VENCIDOS_DATA.length+')',margin,y);
+                pdf.text('PROCESSOS VENCIDOS ('+VENCIDOS_DATA.length+')',margin,y);
                 y+=6;
                 
                 pdf.autoTable({
@@ -1637,7 +1637,7 @@ async function generateReport(type){
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica','bold');
                 pdf.setTextColor(26,90,108);
-                pdf.text(PROCESSOS VENCIDOS ('+meusV.length+')',margin,y);
+                pdf.text('PROCESSOS VENCIDOS ('+meusV.length+')',margin,y);
                 y+=5;
                 
                 pdf.autoTable({
@@ -1682,7 +1682,7 @@ async function generateReport(type){
                 pdf.setFontSize(11);
                 pdf.setFont('helvetica','bold');
                 pdf.setTextColor(26,90,108);
-                pdf.text(PROCESSOS VENCIDOS ('+VENCIDOS_DATA.length+')',margin,y);
+                pdf.text('PROCESSOS VENCIDOS ('+VENCIDOS_DATA.length+')',margin,y);
                 y+=6;
                 
                 pdf.autoTable({
@@ -1711,7 +1711,7 @@ async function generateReport(type){
         pdf.save('PGM_'+type+'_'+hoje.replace(/\//g,'-')+'.pdf');
     } catch(err){
         console.error(err);
-        alert('Erro ao gerar PDF: '+err.mêssage);
+        alert('Erro ao gerar PDF: '+err.message);
     } finally {
         overlay.classList.remove('show');
     }
