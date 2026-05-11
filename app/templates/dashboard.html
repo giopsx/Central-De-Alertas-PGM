@@ -593,7 +593,7 @@ async function loadDashboard(){
         }
         if(critData) renderCriticos(critData);
         popularSelectsResponsaveis();
-    } catch(e){ console.warn('API indisponivel:',e.mêssage); }
+    } catch(e){ console.warn('API indisponivel:',e.message); }
     if(!apiOk){
         try{
             var dl=JSON.parse(localStorage.getItem('pgm_dash_cache')||'null');
@@ -604,8 +604,9 @@ async function loadDashboard(){
 
 // ── RENDER DASHBOARD ──────────────────────────────────────────────────────────
 function renderDashboard(data){
-    if(data&&!data.sem_dados&&data.stats){
-        var kpis=data.stats;
+    // Suporta tanto data.stats (legado) quanto dados diretos (novo)
+    var kpis = data && data.stats ? data.stats : data;
+    if(data && kpis && (kpis.total !== undefined)){
         ['total','vencidos','proximos','cumpridos'].forEach(function(k){
             var el=document.getElementById('kpi-'+k); if(el) el.textContent=kpis[k]||0;
         });
@@ -616,6 +617,9 @@ function renderDashboard(data){
             var hh=document.getElementById('import-history');
             if(hh) hh.innerHTML='<li style="font-size:13px;color:var(--text)"><strong>'+data.filename+'</strong></li>';
         }
+        // Carregar listas de processos
+        if(data.vencidos_lista) VENCIDOS_DATA=data.vencidos_lista;
+        if(data.proximos_lista) PROXIMOS7=data.proximos_lista;
     } else {
         ['total','vencidos','proximos','cumpridos'].forEach(function(k){
             var el=document.getElementById('kpi-'+k); if(el) el.textContent='—';
@@ -1164,7 +1168,7 @@ function equipe_editar(id){
         var t=document.getElementById('equipe-form-titulo'); if(t) t.textContent='Editar Membro';
         var b=document.getElementById('equipe-btn-cancelar'); if(b) b.style.display='inline-flex';
         document.getElementById('eq-nome').scrollIntoView({behavior:'smooth'});
-    } catch(e){ alert('Erro ao editar: '+e.mêssage); }
+    } catch(e){ alert('Erro ao editar: '+e.message); }
 }
 
 function equipe_excluir(id,nome){
@@ -1209,7 +1213,7 @@ async function equipe_salvar(){
         var res=await fetch(url,{method:method,headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
         var json=await res.json();
         if(json.success) savedViaAPI=true;
-    } catch(e){ console.warn('API indisponivel:',e.mêssage); }
+    } catch(e){ console.warn('API indisponivel:',e.message); }
     try{
         var lista=JSON.parse(localStorage.getItem('pgm_equipe_v1')||'[]');
         var membro=Object.assign({id:Date.now()},body);
