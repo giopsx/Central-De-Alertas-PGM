@@ -419,7 +419,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
     <button class="btn btn-amber" onclick="alertarTodosProximos()">Alertar Todos</button>
   </div>
   <div class="fb">
-    <div class="sw"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="filtro-próximos" type="text" placeholder="Buscar processo, responsavel ou parte..."></div>
+    <div class="sw"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg><input id="filtro-proximos" type="text" placeholder="Buscar processo, responsavel ou parte..."></div>
     <select id="resp-proximos" class="fsel"><option value="">Todos responsaveis</option></select>
     <div style="display:flex;align-items:center;gap:6px">
       <label style="font-size:12px;color:var(--text2);white-space:nowrap">Prazo:</label>
@@ -761,7 +761,7 @@ async function popularSelectsResponsaveis(){
         } catch(e){}
     }
     // Popular todos os selects de responsavel
-    ['resp-hoje','resp-próximos','resp-critico'].forEach(function(selId){
+    ['resp-hoje','resp-proximos','resp-critico'].forEach(function(selId){
         var sel=document.getElementById(selId); if(!sel) return;
         var cur=sel.value;
         sel.innerHTML='<option value="">Todos responsaveis</option>';
@@ -802,9 +802,9 @@ function renderPagina(tipo){
     if(pagState[tipo]>tp) pagState[tipo]=tp;
     var ini=(pagState[tipo]-1)*POR_PAG;
     var pg=fl.slice(ini,ini+POR_PAG);
-    var cntEl=document.getElementById(isHoje?'count-hoje':ic?'count-próximos-vencer':'count-vencidos');
+    var cntEl=document.getElementById(isHoje?'count-hoje':ic?'count-proximos-vencer':'count-vencidos');
     if(cntEl) cntEl.textContent=fl.length;
-    var tb=document.getElementById(isHoje?'tbody-hoje':ic?'tbody-próximos-vencer':'tbody-vencidos');
+    var tb=document.getElementById(isHoje?'tbody-hoje':ic?'tbody-proximos-vencer':'tbody-vencidos');
     if(!tb) return;
     if(!pg.length){
         tb.innerHTML='<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text3)">Nenhum processo encontrado.</td></tr>';
@@ -869,7 +869,7 @@ function toggleSel(chk){
 }
 
 function selecionarTodos(tipo,checked){
-    var tbId=tipo==='hoje'?'tbody-hoje':'tbody-próximos-vencer';
+    var tbId=tipo==='hoje'?'tbody-hoje':'tbody-proximos-vencer';
     document.querySelectorAll('#'+tbId+' .chk-row').forEach(function(cb){
         cb.checked=checked;
         var proc=cb.getAttribute('data-proc');
@@ -1246,7 +1246,7 @@ function initFiltros(){
     if(dataCritico) dataCritico.addEventListener('change',function(){ filtroState.critico.data=this.value; pagState.critico=1; renderPagina('critico'); });
     var dataProximos=document.getElementById('data-proximos');
     if(dataProximos) dataProximos.addEventListener('change',function(){ filtroState.proximos.data=this.value; pagState.critico=1; renderPagina('critico'); });
-    [['filtro-hoje','resp-hoje','hoje'],['filtro-critico','resp-critico','critico'],['filtro-próximos','resp-próximos','proximos'],['filtro-vencido','resp-critico','vencido']].forEach(function(g){
+    [['filtro-hoje','resp-hoje','hoje'],['filtro-critico','resp-critico','critico'],['filtro-proximos','resp-proximos','proximos'],['filtro-vencido','resp-critico','vencido']].forEach(function(g){
         var ft=document.getElementById(g[0]),rs=document.getElementById(g[1]),t=g[2];
         if(ft) ft.addEventListener('input',function(){
             if(t==='proximos'){ filtroState.proximos.texto=this.value; pagState.critico=1; renderPagina('critico'); }
@@ -1378,7 +1378,7 @@ async function generateReport(type){
         var statsKpis={
             total:document.getElementById('kpi-total')?.textContent||'0',
             vencidos:document.getElementById('kpi-vencidos')?.textContent||VENCIDOS_DATA.length,
-            próximos:document.getElementById('kpi-proximos')?.textContent||PROXIMOS7.length,
+            proximos:document.getElementById('kpi-proximos')?.textContent||PROXIMOS7.length,
             cumpridos:document.getElementById('kpi-cumpridos')?.textContent||'0',
             taxa:(document.getElementById('kpi-taxa-label')?.textContent||'0%').replace(' de taxa','')
         };
