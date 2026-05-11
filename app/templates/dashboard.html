@@ -546,7 +546,7 @@ async function importarPlanilha(){
             var d=json.diff||{};
             alert('Planilha importada com sucesso!\n\n'+
                 s.total+' processos | '+s.vencidos+' vencidos | '+
-                s.próximos+' próximos | '+s.taxa+'% cumpridos');
+                s.proximos+' próximos | '+s.taxa+'% cumpridos');
             // Mostrar diff
             if(d.total_delta!==undefined){
                 var sinal=function(n){return n>0?'+'+n:String(n);};
@@ -655,8 +655,8 @@ function calcDias(prazoStr){
 }
 
 function renderCriticos(data){
-    if(data&&data.próximos){
-        var todos=data.próximos.map(function(r){
+    if(data&&data.proximos){
+        var todos=data.proximos.map(function(r){
             var diasReal=calcDias(r.prazo);
             return {proc:r.processo,parte:r.parte||'',resp:r.responsavel,prazo:r.prazo,vara:r.vara,tipo:r.tipo||'',dias:Math.abs(diasReal),_diff:diasReal};
         });
@@ -670,7 +670,6 @@ function renderCriticos(data){
     }
     renderPagina('hoje'); renderPagina('critico'); renderPagina('vencido');
     atualizarBadges();
-    // Popular selects de responsaveis com membros ativos da equipe
     popularSelectsResponsaveis();
 }
 
@@ -1396,7 +1395,7 @@ async function generateReport(type){
                 ['Total de Processos',statsKpis.total],
                 ['Processos Cumpridos',statsKpis.cumpridos],
                 ['Processos Vencidos',statsKpis.vencidos],
-                ['Próximos a Vencer',statsKpis.próximos],
+                ['Próximos a Vencer',statsKpis.proximos],
                 ['Taxa de Cumprimento',statsKpis.taxa]
             ];
             
