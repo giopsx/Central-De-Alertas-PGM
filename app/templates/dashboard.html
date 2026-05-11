@@ -293,7 +293,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 <main class="main">
 
 <!-- DASHBOARD -->
-<div id="dashboard" class="tab-content active">
+<div id="tab-dashboard" class="tab-content active">
   <div class="ph">
     <h2>Dashboard</h2>
     <p id="dash-data-label">Visao geral dos prazos processuais</p>
@@ -356,7 +356,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 </div>
 
 <!-- IMPORTAR -->
-<div id="import" class="tab-content">
+<div id="tab-import" class="tab-content">
   <div class="ph"><h2>Importar Planilha</h2><p>Carregue o arquivo XLSX com os prazos processuais.</p></div>
   <div class="card" style="max-width:540px">
     <div class="fg">
@@ -377,7 +377,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 </div>
 
 <!-- VENCE HOJE -->
-<div id="hoje" class="tab-content">
+<div id="tab-hoje" class="tab-content">
   <div class="ph"><h2>Vence Hoje</h2><p>Processos com prazo vencendo hoje, nao cumpridos.</p></div>
   <div class="alert ar" style="justify-content:space-between">
     <span style="display:flex;align-items:center;gap:8px">
@@ -409,7 +409,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 </div>
 
 <!-- PROXIMOS 7 DIAS -->
-<div id="criticos" class="tab-content">
+<div id="tab-criticos" class="tab-content">
   <div class="ph"><h2>Próximos 7 Dias</h2><p>Processos com prazo vencendo nos próximos 7 dias, nao cumpridos.</p></div>
   <div class="alert aa" style="justify-content:space-between">
     <span style="display:flex;align-items:center;gap:8px">
@@ -443,7 +443,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 </div>
 
 <!-- VENCIDOS -->
-<div id="vencidos" class="tab-content">
+<div id="tab-vencidos" class="tab-content">
   <div class="ph"><h2>Processos Vencidos</h2><p>Processos com prazo ja expirado e nao cumpridos.</p></div>
   <div class="alert ar" style="justify-content:space-between">
     <span style="display:flex;align-items:center;gap:8px">
@@ -473,7 +473,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 </div>
 
 <!-- RELATORIOS -->
-<div id="relatorios" class="tab-content">
+<div id="tab-relatorios" class="tab-content">
   <div class="ph"><h2>Relatórios</h2><p>Exporte relatorios em PDF para compartilhamento e análise.</p></div>
   <div class="rg">
     <div class="rc"><div class="ri" style="background:rgba(59,127,255,.12)"><svg viewBox="0 0 24 24" stroke="var(--accent2)"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div><h3>Relatório Semanal</h3><p>Resumo de prazos cumpridos, vencidos e próximos da semana.</p><button class="btn btn-blue" onclick="generateReport('semanal')">Gerar PDF</button></div>
@@ -484,7 +484,7 @@ td small{font-size:11px;color:var(--text3);display:block;margin-top:1px}
 </div>
 
 <!-- EQUIPE -->
-<div id="equipe" class="tab-content">
+<div id="tab-equipe" class="tab-content">
   <div class="ph"><h2>Equipe</h2><p>Gerencie os membros e seus contatos para alertas via WhatsApp.</p></div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
     <div class="card">
