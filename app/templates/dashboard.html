@@ -78,8 +78,8 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .kg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
 .kc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s;cursor:default;}
 .kc:hover{border-color:var(--border2);box-shadow:0 4px 24px rgba(0,0,0,.3)}
-.kc-glow{position:absolute;top:-40px;right:-40px;width:100px;height:100px;border-radius:50%;opacity:.6;filter:blur(30px);pointer-events:none;}
-.kc.blue .kc-glow{background:var(--accent)}.kc.red .kc-glow{background:var(--red)}.kc.amber .kc-glow{background:var(--amber)}.kc.green .kc-glow{background:var(--green)}
+.kc-glow{display:none}
+
 .kc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
 .kc-lbl{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em}
 .kc-ico{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center}
@@ -92,10 +92,10 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .kc.red .kc-val{color:var(--red)}.kc.amber .kc-val{color:var(--amber)}.kc.green .kc-val{color:var(--green)}
 .kc-sub{font-size:12px;color:var(--text3);margin-top:6px}
 .kc-bar{height:2px;border-radius:2px;margin-top:14px;opacity:.5}
-.kc.blue .kc-bar{background:linear-gradient(90deg,var(--accent),transparent)}
-.kc.red .kc-bar{background:linear-gradient(90deg,var(--red),transparent)}
-.kc.amber .kc-bar{background:linear-gradient(90deg,var(--amber),transparent)}
-.kc.green .kc-bar{background:linear-gradient(90deg,var(--green),transparent)}
+.kc.blue .kc-bar{background:var(--border)}
+.kc.red .kc-bar{background:var(--border)}
+.kc.amber .kc-bar{background:var(--border)}
+.kc.green .kc-bar{background:var(--border)}
 
 .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-bottom:16px}
 .card:hover{border-color:var(--border2)}
