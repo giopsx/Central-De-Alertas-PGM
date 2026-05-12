@@ -1,19 +1,24 @@
-# Subprocuradoria Contenciosa — Painel de Prazos
+# Central-De-Alertas-PGM
 
-Sistema web de controle de prazos processuais da Subprocuradoria Contenciosa da PGM Porto Velho.
+Sistema web de controle de prazos processuais desenvolvido para a Subprocuradoria Contenciosa da Procuradoria-Geral do Município de Porto Velho.
+
+---
 
 ## Funcionalidades
 
-- **Dashboard** com KPIs em tempo real: total de processos, vencidos, próximos 7 dias e cumpridos
+- **Dashboard** com indicadores em tempo real: total de processos, vencidos, próximos 7 dias e cumpridos
 - **Gráfico de performance** por responsável com taxa de cumprimento
-- **Aba Críticos** — processos vencendo nos próximos 7 dias, com filtros por responsável e vara
-- **Aba Vencidos** — processos com prazo expirado não cumpridos, com filtros
-- **Importação de planilha** XLSX (Prazos_2026_Contencioso.xlsx) com diff da importação anterior
-- **Alertas via WhatsApp** — abre conversa com mensagem pré-preenchida para o responsável
-- **Relatórios em PDF** — semanal, mensal, individual (com indicadores de cumprimento) e de críticos
-- **Gestão de equipe** — cadastro com nome, função, email e WhatsApp
+- **Vence Hoje** — processos com prazo no dia atual
+- **Próximos 7 Dias** — processos com prazo iminente, com filtros por responsável e data
+- **Vencidos** — processos com prazo expirado não cumpridos
+- **Importação de planilha** XLSX com comparativo da importação anterior
+- **Alertas via WhatsApp** — mensagem pré-preenchida enviada ao responsável pelo processo
+- **Relatórios em PDF** — semanal, mensal, individual e de críticos, com resumo por tipo de petição
+- **Gestão de equipe** — cadastro de membros com nome, função, e-mail e WhatsApp
 - **Marcar como cumprido** — remove o processo das listas de pendentes
 - **Modo noturno** — tema claro e escuro
+
+---
 
 ## Stack
 
@@ -25,36 +30,43 @@ Sistema web de controle de prazos processuais da Subprocuradoria Contenciosa da 
 | PDF | jsPDF + jsPDF-AutoTable |
 | Gráficos | Chart.js |
 | Excel | SheetJS |
-| Deploy | Render (Web Service) |
+| Deploy | Render |
 
-## Estrutura
+---
+
+## Estrutura do Projeto
 
 ```
 ├── app/
 │   ├── __init__.py          # Factory do Flask
-│   ├── routes.py            # Todas as rotas e lógica de negócio
+│   ├── routes.py            # Rotas e lógica de negócio
+│   ├── static/              # Arquivos estáticos (logo, etc.)
 │   └── templates/
 │       └── dashboard.html   # Frontend completo (SPA)
-├── run.py                   # Entrypoint
+├── run.py                   # Entrypoint da aplicação
 ├── requirements.txt         # Dependências Python
-├── Procfile                 # Configuração do Render/Gunicorn
+├── Procfile                 # Configuração do servidor
 └── .gitignore
 ```
 
+---
+
 ## Variáveis de Ambiente
 
-Configure no painel do Render em **Settings → Environment**:
+Configure as variáveis de ambiente no painel do seu serviço de deploy. **Nunca as inclua no código ou no repositório.**
 
-| Variável | Descrição | Exemplo |
-|----------|-----------|---------|
-| `ACCESS_TOKEN` | Token de acesso ao painel | `pgm-contenciosa-2026` |
-| `SECRET_KEY` | Chave secreta do Flask | qualquer string aleatória |
-| `SUPABASE_URL` | URL do projeto Supabase | `https://xxx.supabase.co` |
-| `SUPABASE_KEY` | Service role key do Supabase | `eyJ...` |
+| Variável | Descrição |
+|----------|-----------|
+| `ACCESS_TOKEN` | Token de acesso ao painel |
+| `SECRET_KEY` | Chave secreta do Flask |
+| `SUPABASE_URL` | URL do projeto Supabase |
+| `SUPABASE_KEY` | Service role key do Supabase |
 
-## Banco de Dados (Supabase)
+---
 
-Execute no SQL Editor do Supabase para criar as tabelas:
+## Banco de Dados
+
+Execute os scripts SQL abaixo no editor do Supabase para criar as tabelas necessárias:
 
 ```sql
 -- Tabela da equipe
@@ -64,6 +76,7 @@ CREATE TABLE IF NOT EXISTS equipe (
   funcao     TEXT,
   email      TEXT,
   whatsapp   TEXT,
+  ativo      BOOLEAN DEFAULT TRUE,
   criado_em  TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -80,50 +93,68 @@ ALTER TABLE equipe      DISABLE ROW LEVEL SECURITY;
 ALTER TABLE dados_cache DISABLE ROW LEVEL SECURITY;
 ```
 
-## Como Rodar Localmente
+---
+
+## Rodando Localmente
 
 ```bash
-# Clonar o repositório
-git clone https://github.com/giopsx/refeito-certo.git
-cd refeito-certo
+# 1. Clonar o repositório
+git clone <url-do-repositorio>
+cd <nome-da-pasta>
 
-# Criar ambiente virtual
+# 2. Criar e ativar ambiente virtual
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate       # Linux/Mac
+venv\Scripts\activate          # Windows
 
-# Instalar dependências
+# 3. Instalar dependências
 pip install -r requirements.txt
 
-# Criar arquivo .env
-echo "ACCESS_TOKEN=pgm-contenciosa-2026" > .env
-echo "SECRET_KEY=dev-secret-key" >> .env
-echo "SUPABASE_URL=https://sua-url.supabase.co" >> .env
-echo "SUPABASE_KEY=sua-service-role-key" >> .env
+# 4. Criar arquivo .env com as variáveis de ambiente
+# (veja a seção acima)
 
-# Rodar
+# 5. Rodar
 python run.py
 ```
 
-Acesse: `http://localhost:5000/?token=pgm-contenciosa-2026`
+---
 
-## Deploy no Render
+## Deploy
 
-1. Conecte o repositório GitHub ao Render
-2. Crie um **Web Service** com:
-   - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `gunicorn run:app`
-3. Configure as variáveis de ambiente
-4. Após o deploy, acesse o painel e importe a planilha
+1. Conecte o repositório ao serviço de deploy
+2. Configure o build: `pip install -r requirements.txt`
+3. Configure o start: `gunicorn run:app`
+4. Adicione as variáveis de ambiente no painel
+5. Após o deploy, acesse o painel e importe a planilha
 
-## Uso
+---
 
-1. Acesse o painel via URL com o token de acesso
-2. Vá em **Importar** e carregue o arquivo `Prazos_2026_Contencioso.xlsx`
+## Como Usar
+
+1. Acesse o painel com o token de acesso configurado
+2. Vá em **Importar** e carregue o arquivo XLSX com os prazos
 3. Cadastre os membros da equipe na aba **Equipe** com os números de WhatsApp
-4. Use os filtros nas abas **Críticos** e **Vencidos** para gerenciar os prazos
-5. Clique em 📱 para enviar alerta via WhatsApp ao responsável
-6. Clique em ✓ para marcar um processo como cumprido
-7. Gere relatórios PDF na aba **Relatórios**
+4. Acompanhe os prazos pelas abas **Vence Hoje**, **Próximos 7 Dias** e **Vencidos**
+5. Use os filtros para buscar por responsável, data ou processo
+6. Clique em 📱 para enviar alerta via WhatsApp ao responsável
+7. Clique em ✓ para marcar um processo como cumprido
+8. Gere relatórios PDF na aba **Relatórios**
+
+---
+
+## Formato da Planilha
+
+A planilha XLSX deve conter as seguintes colunas:
+
+| Coluna | Descrição |
+|--------|-----------|
+| PRAZO | Data do prazo (DD/MM/AAAA) |
+| RESPONSÁVEL | Nome do procurador responsável |
+| Nº DO PROCESSO | Número do processo |
+| PARTE ATIVA | Nome da parte |
+| VARA | Vara judicial |
+| TIPO DE PETIÇÃO | Tipo da petição (opcional) |
+| CUMPRIDO? | Status (SIM / PARCIAL / PREJUDICADO) |
 
 ---
 
