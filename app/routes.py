@@ -475,3 +475,43 @@ def security(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'DENY'
     return response
+
+@bp.route('/api/alertas-amanha')
+@token_required
+def alertas_amanha():
+    from datetime import timezone, timedelta
+    tz_ro = timezone(timedelta(hours=-4))
+    hoje = datetime.now(tz_ro).date()
+
+    todos_proximos = cache_get('proximos') or []
+    
+    # Busca os números de WhatsApp da equipe
+    equipe_raw = _sb_get('equipe', 'select=nome,whatsapp,ativo')
+    equipe_map = {}
+    if equipe_raw and isinstance(equipe_raw, list):
+        for m in equipe_raw:
+            if isinstance(m, dict) and m.get('ativo') is not False and m.get('whatsapp'):
+                equipe_map[m.get('nome', '').strip().upper()] = m.get('whatsapp')
+
+    alertas_por_pessoa = {}
+
+    for p in todos_proximos:
+        try:
+            prazo_d = datetime.strptime(p['prazo'], '%d/%m/%Y').date()
+            diff = (prazo_d - hoje).days
+            
+            # Se diff == 1, o prazo vence exatamente amanhã
+            if diff == 1: 
+                resp = p.get('responsavel', '').strip().upper()
+                telefone = equipe_map.get(resp)
+                
+                # Só adiciona se o responsável tiver um WhatsApp cadastrado
+                if telefone:
+                    if telefone not in alertas_por_pessoa:
+                        alertas_por_pessoa[telefone] = {'nome': resp, 'telefone': telefone, 'prazos': []}
+                    alertas_por_pessoa[telefone]['prazos'].append(p)
+        except Exception:
+            pass
+
+    # Retorna uma lista formatada pronta para o n8n iterar
+    return jsonify({'alertas': list(alertas_por_pessoa.values())})
