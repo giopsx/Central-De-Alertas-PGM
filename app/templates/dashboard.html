@@ -1005,7 +1005,7 @@ async function alertarTodosProximos(){
         var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
         if(num){
             var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'—')+'.\n   Vara: '+(d.vara||'—')+'.\n   Prazo: '+d.prazo+(d.dias!==undefined?' ('+d.dias+'d)':''); }).join('\n');
-            var msg='ALERTA DE PRAZO ⚠️\nCentral-De-Alertas-PGM - PGM Porto Velho.\n\nOlá, '+grupo.resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo A VENCER dia '+grupo.processos[0].prazo+' ('+diaLabel(grupo.processos[0].dias,'proximo')+'):\n\n'+linhas+'\n\nEsta é uma mensagem automática.';
+            var msg='ALERTA DE PRAZOS ⚠️\nCentral De Alertas PGM (Sub. Contenciosa) - Porto Velho.\n\nOlá, '+grupo.resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo A VENCER dia '+grupo.processos[0].prazo+' ('+diaLabel(grupo.processos[0].dias,'proximo')+'):\n\n'+linhas+'\n\nEsta é uma mensagem automática.';
             abrirWhatsApp(num,msg); setTimeout(prox,2000);
         } else { if(grupo.resp&&semNumero.indexOf(grupo.resp)<0) semNumero.push(grupo.resp); prox(); }
     }
@@ -1025,7 +1025,7 @@ async function alertarTodosVencidos(){
         var num=grupo.resp?contatos[grupo.resp.toUpperCase()]:null;
         if(num){
             var linhas=grupo.processos.map(function(d,i){ return (i+1)+'. *'+(d.proc||'')+'*\n   Parte: '+(d.parte||'—')+'.\n   Vara: '+(d.vara||'—')+'.\n   Prazo: '+d.prazo+' (VENCIDO)'; }).join('\n');
-            var msg='ALERTA DE PRAZO ⚠️\nCentral-De-Alertas-PGM - PGM Porto Velho.\n\nOlá, '+grupo.resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo VENCIDO:\n\n'+linhas+'\n\nEsta é uma mensagem automática.';
+            var msg='ALERTA DE PRAZOS ⚠️\nCentral De Alertas - PGM Porto Velho.\n\nOlá, '+grupo.resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo VENCIDO:\n\n'+linhas+'\n\n_Esta é uma mensagem automática._';
             abrirWhatsApp(num,msg); setTimeout(prox,2000);
         } else { if(grupo.resp&&semNumero.indexOf(grupo.resp)<0) semNumero.push(grupo.resp); prox(); }
     }
@@ -1065,7 +1065,7 @@ async function alertarSelecionados(tipo){
             var linhas=grupo.processos.map(function(d,i){
                 return (i+1)+'. *'+(d.proc||d.processo||'')+'*\n   Parte: '+(d.parte||'—')+'.\n   Vara: '+(d.vara||'—')+'.\n   Prazo: '+d.prazo+(tipo==='vencido'?' (VENCIDO)':'');
             }).join('\n\n');
-            var msg='ALERTA DE PRAZO ⚠️\nCentral-De-Alertas-PGM - PGM Porto Velho.\n\nOlá, '+resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo '+sit+':\n\n'+linhas+'\n\nEsta é uma mensagem automática.';
+            var msg='ALERTA DE PRAZOS ⚠️\nCentral De Alertas - PGM Porto Velho.\n\nOlá, '+resp+'!\n\nVocê tem *'+grupo.processos.length+' processo(s)* com prazo '+sit+':\n\n'+linhas+'\n\n_Esta é uma mensagem automática._';
             abrirWhatsApp(num,msg);
             setTimeout(prox,2000);
         } else {
