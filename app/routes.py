@@ -331,8 +331,9 @@ def get_dashboard():
                 if isinstance(m, dict) and m.get('nome')
                 and m.get('ativo') is not False
             )
-            if cadastrados:
+            if cadastrados:  # só filtra se houver membros cadastrados
                 perf = [p for p in perf if p.get('responsavel', '').strip().upper() in cadastrados]
+            # se equipe vazia, mostra todos sem filtrar
     except Exception as e:
         print(f'[WARN] filtro equipe falhou: {e}')
     
